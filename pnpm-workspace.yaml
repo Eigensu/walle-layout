@@ -1,0 +1,24 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+
+# Use shared lockfile
+shared-workspace-lockfile: true
+
+# Hoist dependencies to root node_modules when possible
+hoist-pattern:
+  - '*'
+
+# Don't hoist these packages
+public-hoist-pattern:
+  - '*eslint*'
+  - '*prettier*'
+
+# Enable strict peer dependencies
+strict-peer-dependencies: false
+
+# Auto install peer dependencies
+auto-install-peers: true
+
+# Use hard links in node_modules
+node-linker: hoisted
