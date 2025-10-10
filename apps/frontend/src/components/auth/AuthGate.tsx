@@ -15,6 +15,11 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!isLoading) {
+      // If authenticated and on public landing, go to app home
+      if (isAuthenticated && isPublicHome) {
+        router.replace("/home");
+        return;
+      }
       if (!isAuthenticated && !isAuthRoute && !isPublicHome) {
         router.replace("/auth/login");
       }

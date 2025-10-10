@@ -18,7 +18,7 @@ interface PillNavbarProps {
 }
 
 const DEFAULT_ITEMS: PillNavItem[] = [
-  { id: "home", label: "Home", href: "/", icon: <Home className="w-4 h-4" /> },
+  { id: "home", label: "Home", href: "/home", icon: <Home className="w-4 h-4" /> },
   { id: "leaderboards", label: "Leaderboards", href: "/leaderboards", icon: <Trophy className="w-4 h-4" /> },
   { id: "my-team", label: "My Team", href: "/demo", icon: <Users className="w-4 h-4" /> },
   { id: "sponsors", label: "Sponsors", href: "/sponsors", icon: <Star className="w-4 h-4" /> },
