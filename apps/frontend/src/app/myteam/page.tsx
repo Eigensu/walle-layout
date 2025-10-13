@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   PlayerCard,
   PlayerList,
@@ -16,6 +17,7 @@ import type { Player } from "@/components";
 import { MobileUserMenu } from "@/components/navigation/MobileUserMenu";
 import { useAuth } from "@/contexts/AuthContext";
 import { NEXT_PUBLIC_API_URL } from "@/config/env";
+import { createTeam } from "@/lib/api/teams";
 
 type ApiPlayer = {
   id: string;
@@ -30,6 +32,7 @@ type ApiPlayer = {
 
 export default function MyTeamPage() {
   const { isAuthenticated } = useAuth();
+  const router = useRouter();
   const [players, setPlayers] = useState<(Player & { slot: number })[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -38,6 +41,11 @@ export default function MyTeamPage() {
   const [viceCaptainId, setViceCaptainId] = useState<string>("");
   const [currentStep, setCurrentStep] = useState(1);
   const [activeSlot, setActiveSlot] = useState<number>(1);
+  const [isStep1Collapsed, setIsStep1Collapsed] = useState(false);
+
+  // Team submission states
+  const [submitting, setSubmitting] = useState(false);
+  const [teamName, setTeamName] = useState("");
 
   // Slots order for Step 1
   const SLOT_SEQUENCE = [1, 2, 3, 4] as const;
@@ -121,19 +129,24 @@ export default function MyTeamPage() {
   );
 
   const goToNextSlot = () => {
-    const idx = SLOT_SEQUENCE.indexOf(activeSlot as (typeof SLOT_SEQUENCE)[number]);
+    const idx = SLOT_SEQUENCE.indexOf(
+      activeSlot as (typeof SLOT_SEQUENCE)[number]
+    );
     const next = SLOT_SEQUENCE[Math.min(idx + 1, SLOT_SEQUENCE.length - 1)];
     setActiveSlot(next);
   };
 
   const goToPrevSlot = () => {
-    const idx = SLOT_SEQUENCE.indexOf(activeSlot as (typeof SLOT_SEQUENCE)[number]);
+    const idx = SLOT_SEQUENCE.indexOf(
+      activeSlot as (typeof SLOT_SEQUENCE)[number]
+    );
     const prev = SLOT_SEQUENCE[Math.max(idx - 1, 0)];
     setActiveSlot(prev);
   };
 
   const isFirstSlot = useMemo(
-    () => SLOT_SEQUENCE.indexOf(activeSlot as (typeof SLOT_SEQUENCE)[number]) === 0,
+    () =>
+      SLOT_SEQUENCE.indexOf(activeSlot as (typeof SLOT_SEQUENCE)[number]) === 0,
     [activeSlot]
   );
 
@@ -155,14 +168,37 @@ export default function MyTeamPage() {
     setViceCaptainId("");
     setCurrentStep(1);
     setActiveSlot(1);
+    setIsStep1Collapsed(false);
   };
 
   const handlePlayerSelect = (playerId: string) => {
-    setSelectedPlayers((prev) =>
-      prev.includes(playerId)
-        ? prev.filter((id) => id !== playerId)
-        : [...prev, playerId]
-    );
+    setSelectedPlayers((prev) => {
+      // If player is already selected, allow deselection
+      if (prev.includes(playerId)) {
+        return prev.filter((id) => id !== playerId);
+      }
+
+      // Find the player to check their slot
+      const player = players.find((p) => p.id === playerId);
+      if (!player) return prev;
+
+      // Check if the slot limit has been reached
+      const currentSlotCount = prev.filter((id) => {
+        const p = players.find((mp) => mp.id === id);
+        return p?.slot === player.slot;
+      }).length;
+
+      const slotLimit =
+        SLOT_LIMITS[player.slot as keyof typeof SLOT_LIMITS] || 4;
+
+      // Prevent selection if limit reached (player will be disabled, so this is backup)
+      if (currentSlotCount >= slotLimit) {
+        return prev;
+      }
+
+      // Allow selection
+      return [...prev, playerId];
+    });
   };
 
   const handleSetCaptain = (playerId: string) => {
@@ -179,6 +215,48 @@ export default function MyTeamPage() {
     }
   };
 
+  // Handle team submission
+  const handleSubmitTeam = async () => {
+    if (!isAuthenticated) return;
+    if (!teamName.trim()) {
+      alert("Please enter a team name");
+      return;
+    }
+    if (!captainId) {
+      alert("Please select a captain");
+      return;
+    }
+    if (!viceCaptainId) {
+      alert("Please select a vice-captain");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      const token = localStorage.getItem("access_token");
+      if (!token) {
+        throw new Error("Not authenticated");
+      }
+
+      const teamData = {
+        team_name: teamName,
+        player_ids: selectedPlayers,
+        captain_id: captainId,
+        vice_captain_id: viceCaptainId,
+      };
+
+      await createTeam(teamData, token);
+
+      // Redirect to teams page
+      router.push("/teams");
+    } catch (err: any) {
+      console.error("Failed to submit team:", err);
+      alert(err.message || "Failed to submit team");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-primary-50">
       {/* Header: Navbar */}
@@ -187,33 +265,38 @@ export default function MyTeamPage() {
       />
 
       {/* Spacer to prevent content from hiding under fixed navbar */}
-      <div className="h-20"></div>
+      <div className="h-20 sm:h-29"></div>
 
-      {/* Hero Section */}
-      <div className="px-4 mb-10">
-        <div className="text-center max-w-3xl mx-auto mt-6">
-          <h1 className="text-3xl md:text-5xl font-extrabold bg-clip-text text-transparent bg-gradient-primary">
+      {/* Hero Section - More compact on mobile */}
+      <div className="px-4 sm:px-6 mb-4 sm:mb-8 md:mb-10">
+        <div className="text-center max-w-3xl mx-auto mt-2 sm:mt-5 md:mt-6">
+          <h1 className="text-xl sm:text-3xl md:text-5xl font-extrabold bg-clip-text text-transparent bg-gradient-primary leading-tight">
             Build Your Dream Team
           </h1>
-          <p className="mt-2 text-gray-600 text-base md:text-lg">
+          <p className="mt-1.5 sm:mt-2 text-gray-600 text-xs sm:text-base md:text-lg">
             Create the perfect fantasy cricket team and compete for glory!
           </p>
         </div>
       </div>
 
-      <main className="container-responsive py-8">
-        <div className="space-y-8">
-          {/* Progress Section with Clear All on right */}
-          <div className="max-w-3xl mx-auto mt-2 mb-10">
-            <div className="flex items-center justify-between">
-              <div className="flex-1 mr-4">
+      <main className="container-responsive py-3 sm:py-8 px-4 sm:px-6">
+        <div className="space-y-4 sm:space-y-8">
+          {/* Progress Section with Clear All on right - More compact on mobile */}
+          <div className="max-w-3xl mx-auto mb-4 sm:mb-8 md:mb-10">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex-1 mr-2">
                 <ProgressIndicator
                   currentStep={currentStep === 1 ? 0 : currentStep - 1}
                   totalSteps={3}
                   className=""
                 />
               </div>
-              <Button variant="primary" size="sm" onClick={handleClearAll}>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handleClearAll}
+                className="flex-shrink-0 text-xs sm:text-sm px-2.5 sm:px-4"
+              >
                 Clear All
               </Button>
             </div>
@@ -223,114 +306,194 @@ export default function MyTeamPage() {
           <StepCard
             stepNumber={1}
             title="Select Players"
-            description="Choose your fantasy cricket team from available players"
+            description=""
             isActive={currentStep === 1}
             isCompleted={currentStep > 1}
           >
-            <div className="space-y-4">
-              {/* Header with counts */}
-              <div className="flex justify-between items-center mb-2">
-                <h4 className="font-medium text-gray-700">
-                  Players Selected: {selectedPlayers.length}/16
-                </h4>
-                {/* Continue moved to bottom center */}
-              </div>
+            {isStep1Collapsed && currentStep > 1 ? (
+              // Collapsed view - compact mobile summary
+              <div
+                className="cursor-pointer hover:bg-gray-50 p-3 sm:p-4 rounded-lg transition-all duration-200"
+                onClick={() => {
+                  setCurrentStep(1);
+                  setIsStep1Collapsed(false);
+                }}
+              >
+                <div className="space-y-3">
+                  {/* Slot badges in a grid */}
+                  <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
+                    {SLOT_SEQUENCE.map((slot) => {
+                      const count = selectedCountBySlot[slot] || 0;
+                      return (
+                        <Badge
+                          key={slot}
+                          variant={count >= 4 ? "success" : "secondary"}
+                          size="sm"
+                          className="justify-center"
+                        >
+                          Slot {slot}: {count}/4
+                        </Badge>
+                      );
+                    })}
+                  </div>
 
-              {/* Caution banner */}
-              <div className="mb-2 rounded-lg border border-amber-200 bg-amber-50 text-amber-700 px-3 py-2 text-sm">
-                Select at least 4 players in each Slot and press Next to proceed.
-              </div>
-
-              {/* Slot Filter Tabs */}
-              <div className="flex flex-wrap gap-2 mb-4">
-                {(SLOT_SEQUENCE).map((slot) => {
-                  const limit = SLOT_LIMITS[slot as keyof typeof SLOT_LIMITS];
-                  const count = selectedCountBySlot[slot] || 0;
-                  const isActive = activeSlot === slot;
-                  return (
+                  {/* Player count and edit button */}
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm sm:text-base text-gray-600">
+                      <span className="font-semibold text-gray-900">
+                        {selectedPlayers.length} players
+                      </span>{" "}
+                      selected
+                    </div>
                     <Button
-                      key={slot}
-                      variant={isActive ? "primary" : "ghost"}
+                      variant="ghost"
                       size="sm"
-                      onClick={() => setActiveSlot(slot)}
-                      className="rounded-full"
+                      className="text-primary-600 hover:text-primary-700"
                     >
-                      {`Slot ${slot}`}
-                      {limit !== undefined && (
-                        <span className="ml-2 text-xs text-gray-600">
-                          {count || 0}/{limit}
-                        </span>
-                      )}
-                    </Button>
-                  );
-                })}
-              </div>
-
-              {/* Player List with constraints */}
-              {loading ? (
-                <div className="text-center text-gray-500 py-6">Loading players...</div>
-              ) : error ? (
-                <div className="text-center text-red-600 py-6">{error}</div>
-              ) : (
-              <PlayerList
-                players={players as unknown as Player[]}
-                selectedPlayers={selectedPlayers}
-                onPlayerSelect={handlePlayerSelect}
-                maxSelections={16}
-                filterSlot={activeSlot}
-                sortByRole={true}
-                onBlockedSelect={(reason) => alert(reason)}
-                compact={true}
-                displayRoleMap={roleToSlotLabel}
-                compactShowPrice={true}
-              />
-              )}
-
-              {/* Bottom actions: Previous + (Next or Continue) centered */}
-              {activeSlot === SLOT_SEQUENCE[SLOT_SEQUENCE.length - 1] ? (
-                <div className="flex items-center justify-center mt-4">
-                  <div className="flex gap-3">
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      onClick={goToPrevSlot}
-                      disabled={isFirstSlot}
-                    >
-                      Previous
-                    </Button>
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      onClick={() => setCurrentStep(2)}
-                      disabled={!((selectedCountBySlot[activeSlot] || 0) >= 1)}
-                    >
-                      Continue
+                      Edit Selection
                     </Button>
                   </div>
                 </div>
-              ) : (
-                <div className="flex items-center justify-center mt-4">
-                  <div className="flex gap-3">
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      onClick={goToPrevSlot}
-                      disabled={isFirstSlot}
-                    >
-                      Previous
-                    </Button>
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      onClick={goToNextSlot}
-                      disabled={!canNextForActiveSlot}
-                    >
-                      Next
-                    </Button>
-                  </div>
+              </div>
+            ) : (
+              // Full view - show all selection controls
+              <div className="space-y-3 sm:space-y-4">
+                {/* Header with counts */}
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
+                  <h4 className="font-semibold text-gray-900 text-sm sm:text-base">
+                    Players Selected: {selectedPlayers.length}/16
+                  </h4>
+                  {/* Continue moved to bottom center */}
                 </div>
-              )}
-            </div>
+
+                {/* Caution banner */}
+                <div className="mb-2 rounded-lg border border-amber-200 bg-amber-50 text-amber-700 px-2.5 sm:px-3 py-2 sm:py-2.5 text-xs sm:text-sm">
+                  Select at least 4 players in each Slot and press Next to
+                  proceed.
+                </div>
+
+                {/* Slot Filter Tabs */}
+                <div className="flex overflow-x-auto gap-2 mb-3 sm:mb-4 pb-2 -mx-2 px-2 scrollbar-hide">
+                  {SLOT_SEQUENCE.map((slot) => {
+                    const limit = SLOT_LIMITS[slot as keyof typeof SLOT_LIMITS];
+                    const count = selectedCountBySlot[slot] || 0;
+                    const isActive = activeSlot === slot;
+                    return (
+                      <Button
+                        key={slot}
+                        variant={isActive ? "primary" : "ghost"}
+                        size="sm"
+                        onClick={() => setActiveSlot(slot)}
+                        className="rounded-full flex-shrink-0"
+                      >
+                        {`Slot ${slot}`}
+                        {limit !== undefined && (
+                          <span
+                            className={`ml-2 text-xs ${isActive ? "text-white/90" : "text-gray-600"}`}
+                          >
+                            {count || 0}/{limit}
+                          </span>
+                        )}
+                      </Button>
+                    );
+                  })}
+                </div>
+
+                {/* Player List with constraints */}
+                {loading ? (
+                  <div className="text-center text-gray-500 py-6">
+                    Loading players...
+                  </div>
+                ) : error ? (
+                  <div className="text-center text-red-600 py-6">{error}</div>
+                ) : (
+                  <PlayerList
+                    players={players as unknown as Player[]}
+                    selectedPlayers={selectedPlayers}
+                    onPlayerSelect={handlePlayerSelect}
+                    maxSelections={16}
+                    filterSlot={activeSlot}
+                    sortByRole={true}
+                    onBlockedSelect={(reason) => alert(reason)}
+                    compact={true}
+                    displayRoleMap={roleToSlotLabel}
+                    compactShowPrice={true}
+                    isPlayerDisabled={(player) => {
+                      // Don't disable already selected players (allow deselection)
+                      if (selectedPlayers.includes(player.id)) {
+                        return false;
+                      }
+                      // Check if the player's slot has reached its limit
+                      const playerSlot = (player as any).slot;
+                      const currentSlotCount = selectedPlayers.filter((id) => {
+                        const p = players.find((mp) => mp.id === id);
+                        return (p as any)?.slot === playerSlot;
+                      }).length;
+                      const slotLimit =
+                        SLOT_LIMITS[playerSlot as keyof typeof SLOT_LIMITS] ||
+                        4;
+                      return currentSlotCount >= slotLimit;
+                    }}
+                  />
+                )}
+
+                {/* Bottom actions: Previous + (Next or Continue) centered */}
+                {activeSlot === SLOT_SEQUENCE[SLOT_SEQUENCE.length - 1] ? (
+                  <div className="flex items-center justify-center mt-6">
+                    <div className="flex gap-3 w-full sm:w-auto">
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={goToPrevSlot}
+                        disabled={isFirstSlot}
+                        className="flex-1 sm:flex-none"
+                      >
+                        Previous
+                      </Button>
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => {
+                          setCurrentStep(2);
+                          setIsStep1Collapsed(true);
+                          // Scroll to top of page smoothly
+                          window.scrollTo({ top: 0, behavior: "smooth" });
+                        }}
+                        disabled={
+                          !((selectedCountBySlot[activeSlot] || 0) >= 1)
+                        }
+                        className="flex-1 sm:flex-none"
+                      >
+                        Continue
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center mt-6">
+                    <div className="flex gap-3 w-full sm:w-auto">
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={goToPrevSlot}
+                        disabled={isFirstSlot}
+                        className="flex-1 sm:flex-none"
+                      >
+                        Previous
+                      </Button>
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={goToNextSlot}
+                        disabled={!canNextForActiveSlot}
+                        className="flex-1 sm:flex-none"
+                      >
+                        Next
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </StepCard>
 
           {/* Step 2: Captain Selection */}
@@ -399,6 +562,25 @@ export default function MyTeamPage() {
               <div className="space-y-6">
                 {selectedPlayers.length > 0 ? (
                   <>
+                    {/* Team Name Input */}
+                    <div className="mb-6">
+                      <label
+                        htmlFor="teamName"
+                        className="block text-sm font-medium text-gray-700 mb-2"
+                      >
+                        Team Name
+                      </label>
+                      <input
+                        type="text"
+                        id="teamName"
+                        value={teamName}
+                        onChange={(e) => setTeamName(e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                        placeholder="Enter your team name"
+                        maxLength={50}
+                      />
+                    </div>
+
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                       <div
                         className={`${selectedPlayers.length > 0 ? "bg-gradient-to-br from-success-50 to-success-100 border-success-200" : "bg-gray-50 border-gray-200"} rounded-xl p-4 border`}
@@ -452,11 +634,15 @@ export default function MyTeamPage() {
                           className={`text-2xl font-bold mb-1 ${players.filter((p) => selectedPlayers.includes(p.id)).reduce((sum: number, p: Player & { slot: number }) => sum + p.price, 0) > 0 ? "text-primary-700" : "text-gray-700"}`}
                         >
                           ₹
-                          {players
-                            .filter((p) => selectedPlayers.includes(p.id))
-                            .reduce((sum: number, p: Player & { slot: number }) => sum + p.price, 0)
-                            .toFixed(1)}
-                          M
+                          {Math.floor(
+                            players
+                              .filter((p) => selectedPlayers.includes(p.id))
+                              .reduce(
+                                (sum: number, p: Player & { slot: number }) =>
+                                  sum + p.price,
+                                0
+                              )
+                          )}
                         </div>
                         <div
                           className={`text-sm ${players.filter((p) => selectedPlayers.includes(p.id)).reduce((sum: number, p: Player & { slot: number }) => sum + p.price, 0) > 0 ? "text-primary-600" : "text-gray-500"}`}
@@ -512,7 +698,8 @@ export default function MyTeamPage() {
                                     )}
                                   </div>
                                   <div className="text-sm text-gray-500">
-                                    {roleToSlotLabel(player.role)} • {player.team}
+                                    {roleToSlotLabel(player.role)} •{" "}
+                                    {player.team}
                                   </div>
                                 </div>
                               </div>
@@ -521,7 +708,7 @@ export default function MyTeamPage() {
                                   {player.points} pts
                                 </div>
                                 <div className="text-sm text-gray-500">
-                                  ₹{player.price}M
+                                  ₹{Math.floor(player.price)}
                                 </div>
                               </div>
                             </div>
@@ -548,9 +735,10 @@ export default function MyTeamPage() {
               variant="primary"
               size="lg"
               className="shadow-glow"
-              disabled={currentStep !== 3}
+              disabled={currentStep !== 3 || submitting}
+              onClick={handleSubmitTeam}
             >
-              Submit Team & Join Contest
+              {submitting ? "Submitting..." : "Submit Team & Join Contest"}
             </Button>
           </div>
         </div>

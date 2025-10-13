@@ -9,6 +9,7 @@ from .sponsor import (
     UploadResponse
 )
 from .leaderboard import LeaderboardEntrySchema, LeaderboardResponseSchema
+from .team import TeamCreate, TeamUpdate, TeamResponse, TeamsListResponse
 
 __all__ = [
     "UserResponse",
@@ -23,5 +24,9 @@ __all__ = [
     "SponsorResponse",
     "SponsorsListResponse",
     "SponsorDetailResponse",
-    "UploadResponse"
+    "UploadResponse",
+    "TeamCreate",
+    "TeamUpdate",
+    "TeamResponse",
+    "TeamsListResponse"
 ]

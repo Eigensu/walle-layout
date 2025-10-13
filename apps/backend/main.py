@@ -10,6 +10,7 @@ from config.settings import settings
 from config.database import connect_to_mongo, close_mongo_connection
 from app.routes import auth_router, users_router, sponsors_router, leaderboard_router
 from app.routes.players import router as players_router
+from app.routes.teams import router as teams_router
 
 
 @asynccontextmanager
@@ -45,6 +46,7 @@ app.include_router(users_router)
 app.include_router(sponsors_router)
 app.include_router(leaderboard_router)
 app.include_router(players_router)
+app.include_router(teams_router)
 
 class Team(BaseModel):
     id: Optional[int] = None

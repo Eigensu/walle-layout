@@ -44,7 +44,7 @@ const DEFAULT_ITEMS: PillNavItem[] = [
   {
     id: "my-team",
     label: "My Team",
-    href: "/myteam",
+    href: "/teams",
     icon: <Users className="w-4 h-4" />,
   },
   {
