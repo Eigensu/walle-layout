@@ -147,7 +147,7 @@ export default function MyTeamPage() {
   const isFirstSlot = useMemo(
     () =>
       SLOT_SEQUENCE.indexOf(activeSlot as (typeof SLOT_SEQUENCE)[number]) === 0,
-    [activeSlot]
+    [activeSlot, SLOT_SEQUENCE]
   );
 
   const getRoleAvatarGradient = (role: string) => {

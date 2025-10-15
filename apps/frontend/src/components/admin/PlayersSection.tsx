@@ -70,7 +70,7 @@ export function PlayersSection() {
   // Fetch on mount and when filters change
   useEffect(() => {
     fetchPlayers();
-  }, [page, searchQuery, roleFilter, statusFilter]);
+  }, [page, searchQuery, roleFilter, statusFilter, fetchPlayers]);
 
   // Fetch slots on mount
   useEffect(() => {
@@ -181,7 +181,7 @@ export function PlayersSection() {
             </div>
           ) : players.length === 0 ? (
             <div className="text-center py-12 text-gray-500">
-              No players found. Click "Add Player" to get started.
+              No players found. Click &quot;Add Player&quot; to get started.
             </div>
           ) : (
             <>
@@ -236,7 +236,9 @@ export function PlayersSection() {
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {player.slot ? (slotMap[player.slot] || player.slot) : "-"}
+                          {player.slot
+                            ? slotMap[player.slot] || player.slot
+                            : "-"}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
                           {(player.price ?? 0).toFixed(1)}
