@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { PlayersSection } from "./PlayersSection";
-import { SponsorsSection } from "./SponsorsSection";
-import { ContestsSection } from "./ContestsSection";
-import { SlotsSection } from "./SlotsSection";
-import { Users, Award, Trophy, Grid3x3, ArrowLeft, Home } from "lucide-react";
+import { PlayersSection } from "./players/PlayersSection";
+import { SponsorsSection } from "./sponsors/SponsorsSection";
+import { ContestsSection } from "./contests/ContestsSection";
+import { SlotsSection } from "./slots/SlotsSection";
+import { Users, Award, Trophy, Grid3x3, Home } from "lucide-react";
 
 type Section = "players" | "sponsors" | "contests" | "slots";
 

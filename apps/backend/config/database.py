@@ -6,6 +6,7 @@ from app.models.sponsor import Sponsor
 from app.models.team import Team
 from app.models.admin.player import Player as AdminPlayer
 from app.models.admin.slot import Slot
+from app.models.admin.import_log import ImportLog
 from app.models.player import Player as PublicPlayer
 
 settings = get_settings()
@@ -38,6 +39,7 @@ async def connect_to_mongo():
                 AdminPlayer,
                 PublicPlayer,
                 Slot,
+                ImportLog,
             ]
         )
         print(f"✓ Initialized Beanie ODM with database: {settings.mongodb_db_name}")

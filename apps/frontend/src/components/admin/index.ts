@@ -1,5 +1,6 @@
 export { AdminLayout } from "./AdminLayout";
-export { PlayersSection } from "./PlayersSection";
-export { SponsorsSection } from "./SponsorsSection";
-export { ContestsSection } from "./ContestsSection";
-export { SlotsSection } from "./SlotsSection";
+export { PlayersSection } from "./players/PlayersSection";
+export { PlayerImport } from "./players/import/PlayerImport";
+export { SponsorsSection } from "./sponsors/SponsorsSection";
+export { ContestsSection } from "./contests/ContestsSection";
+export { SlotsSection } from "./slots/SlotsSection";
