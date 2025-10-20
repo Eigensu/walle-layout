@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/Button";
+import { Fragment } from "react";
 
 interface PaginationProps {
   currentPage: number;
@@ -40,14 +41,11 @@ export function Pagination({
                   p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1
               )
               .map((p, idx, arr) => (
-                <>
+                <Fragment key={`page-${p}`}>
                   {idx > 0 && arr[idx - 1] !== p - 1 && (
-                    <span key={`ellipsis-${p}`} className="px-2 text-gray-400">
-                      ...
-                    </span>
+                    <span className="px-2 text-gray-400">...</span>
                   )}
                   <button
-                    key={p}
                     onClick={() => onPageChange(p)}
                     className={`px-3 py-1 rounded ${
                       currentPage === p
@@ -57,7 +55,7 @@ export function Pagination({
                   >
                     {p}
                   </button>
-                </>
+                </Fragment>
               ))}
           </div>
           <Button

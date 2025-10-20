@@ -5,6 +5,8 @@ from datetime import datetime
 
 from app.models.team import Team
 from app.models.player import Player
+from app.models.team_contest_enrollment import TeamContestEnrollment
+from app.models.contest import Contest
 from app.models.user import User
 from app.schemas.team import TeamCreate, TeamUpdate, TeamResponse, TeamsListResponse
 from app.utils.dependencies import get_current_active_user
@@ -249,6 +251,20 @@ async def update_team(
             detail="You don't have permission to update this team"
         )
     
+    # Lock edits if team is enrolled in any active contest
+    active_enrs = await TeamContestEnrollment.find({
+        "team_id": team.id,
+        "status": "active",
+    }).to_list()
+    if active_enrs:
+        contest_ids = [enr.contest_id for enr in active_enrs]
+        active_contest_count = await Contest.find({"_id": {"$in": contest_ids}, "status": "active"}).count()
+        if active_contest_count > 0:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Team is locked due to an active contest. Try again when the contest is paused/off.",
+            )
+    
     # Update fields
     update_data = team_data.model_dump(exclude_unset=True)
     
@@ -396,6 +412,20 @@ async def rename_team(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You don't have permission to rename this team"
         )
+    
+    # Lock edits if team is enrolled in any active contest
+    active_enrs = await TeamContestEnrollment.find({
+        "team_id": team.id,
+        "status": "active",
+    }).to_list()
+    if active_enrs:
+        contest_ids = [enr.contest_id for enr in active_enrs]
+        active_contest_count = await Contest.find({"_id": {"$in": contest_ids}, "status": "active"}).count()
+        if active_contest_count > 0:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Team is locked due to an active contest. Try again when the contest is paused/off.",
+            )
     
     # Update team name
     team.team_name = team_name.strip()

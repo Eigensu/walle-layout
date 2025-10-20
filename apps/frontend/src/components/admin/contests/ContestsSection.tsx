@@ -1,51 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Card, CardBody } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import {
-  Search,
-  Filter,
-  Plus,
-  Trophy,
-  Calendar,
-  Users,
-  IndianRupee,
-} from "lucide-react";
+import { Search, Trophy, Calendar } from "lucide-react";
+import { adminContestsApi, Contest } from "@/lib/api/admin/contests";
 
 export function ContestsSection() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [contests, setContests] = useState<Contest[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Mock data
-  const contests = [
-    {
-      id: 1,
-      name: "Spring Championship 2024",
-      status: "Active",
-      startDate: "2024-03-01",
-      endDate: "2024-05-31",
-      participants: 128,
-      prizePool: "₹10,000",
-    },
-    {
-      id: 2,
-      name: "Summer League",
-      status: "Upcoming",
-      startDate: "2024-06-01",
-      endDate: "2024-08-31",
-      participants: 0,
-      prizePool: "₹15,000",
-    },
-    {
-      id: 3,
-      name: "Winter Invitational",
-      status: "Completed",
-      startDate: "2023-12-01",
-      endDate: "2024-02-28",
-      participants: 96,
-      prizePool: "₹8,000",
-    },
-  ];
+  const load = async () => {
+    try {
+      setLoading(true);
+      const res = await adminContestsApi.list({ page_size: 6, search: searchQuery || undefined });
+      setContests(res.contests);
+    } catch (e: any) {
+      setError(e?.message || "Failed to load contests");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="space-y-4">
@@ -61,23 +44,22 @@ export function ContestsSection() {
                   placeholder="Search contests..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') load(); }}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                 />
               </div>
             </div>
             <div className="flex gap-2 w-full sm:w-auto">
-              <Button variant="ghost" size="sm">
-                <Filter className="w-4 h-4 mr-2" />
-                Filter
-              </Button>
-              <Button variant="primary" size="sm">
-                <Plus className="w-4 h-4 mr-2" />
-                Create Contest
-              </Button>
+              <Link href="/admin/contests" className="px-3 py-2 rounded bg-orange-500 text-white text-sm hover:bg-orange-600">
+                Open Contests Manager
+              </Link>
             </div>
           </div>
         </CardBody>
       </Card>
+
+      {error && <div className="text-red-600 text-sm">{error}</div>}
+      {loading && <div className="text-gray-600 text-sm">Loading...</div>}
 
       {/* Contests Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -88,15 +70,7 @@ export function ContestsSection() {
                 <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center text-white shadow-lg">
                   <Trophy className="w-6 h-6" />
                 </div>
-                <span
-                  className={`px-3 py-1 text-xs font-medium rounded-full ${
-                    contest.status === "Active"
-                      ? "bg-green-100 text-green-800"
-                      : contest.status === "Upcoming"
-                        ? "bg-blue-100 text-blue-800"
-                        : "bg-gray-100 text-gray-800"
-                  }`}
-                >
+                <span className="px-3 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
                   {contest.status}
                 </span>
               </div>
@@ -107,30 +81,24 @@ export function ContestsSection() {
                 <div className="flex items-center gap-3 text-sm text-gray-600">
                   <Calendar className="w-4 h-4" />
                   <span>
-                    {new Date(contest.startDate).toLocaleDateString()} -{" "}
-                    {new Date(contest.endDate).toLocaleDateString()}
+                    {new Date(contest.start_at).toLocaleDateString()} - {new Date(contest.end_at).toLocaleDateString()}
                   </span>
-                </div>
-                <div className="flex items-center gap-3 text-sm text-gray-600">
-                  <Users className="w-4 h-4" />
-                  <span>{contest.participants} Participants</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm text-gray-600">
-                  <IndianRupee className="w-4 h-4" />
-                  <span>{contest.prizePool} Prize Pool</span>
                 </div>
               </div>
               <div className="mt-4 pt-4 border-t border-gray-200 flex gap-2">
-                <Button variant="outline" size="sm" className="flex-1">
-                  View Details
-                </Button>
-                <Button variant="ghost" size="sm" className="flex-1">
-                  Edit
-                </Button>
+                <Link href={`/admin/contests/${contest.id}`} className="px-3 py-1 rounded border text-sm flex-1 text-center">
+                  Manage
+                </Link>
+                <Link href={`/contests/${contest.id}`} className="px-3 py-1 rounded border text-sm flex-1 text-center">
+                  View Public
+                </Link>
               </div>
             </CardBody>
           </Card>
         ))}
+        {!loading && contests.length === 0 && (
+          <div className="text-gray-600">No contests yet.</div>
+        )}
       </div>
     </div>
   );

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { PillNavbar, Card, Avatar, Badge, Button } from "@/components";
 import { MobileUserMenu } from "@/components/navigation/MobileUserMenu";
 import { useAuth } from "@/contexts/AuthContext";
@@ -12,6 +13,7 @@ import {
   type TeamResponse,
 } from "@/lib/api/teams";
 import { NEXT_PUBLIC_API_URL } from "@/config/env";
+import { publicContestsApi, type Contest as PublicContest } from "@/lib/api/public/contests";
 
 type ApiPlayer = {
   id: string;
@@ -40,6 +42,16 @@ export default function TeamsPage() {
   const [editingTeamId, setEditingTeamId] = useState<string | null>(null);
   const [editingTeamName, setEditingTeamName] = useState("");
   const [renamingTeamId, setRenamingTeamId] = useState<string | null>(null);
+  // Contests state for join action
+  const [contests, setContests] = useState<PublicContest[]>([]);
+  const [loadingContests, setLoadingContests] = useState(false);
+  const [selectedContestByTeam, setSelectedContestByTeam] = useState<Record<string, string>>({});
+  const [enrollingTeamId, setEnrollingTeamId] = useState<string | null>(null);
+  const [enrollSuccessByTeam, setEnrollSuccessByTeam] = useState<Record<string, { contestId: string; contestName: string }>>({});
+  // Joined contest to display beside Create New Team
+  const [joinedContest, setJoinedContest] = useState<{ id: string; name: string } | null>(null);
+  // Map of team -> enrolled contest (for per-team display)
+  const [enrollmentByTeam, setEnrollmentByTeam] = useState<Record<string, { contestId: string; contestName: string }>>({});
 
   const normalizeRole = (role: string): string => {
     const r = role.toLowerCase();
@@ -101,6 +113,50 @@ export default function TeamsPage() {
     fetchPlayers();
   }, []);
 
+  // Load per-team enrollments and resolve contest names
+  useEffect(() => {
+    let mounted = true;
+    const loadPerTeamEnrollments = async () => {
+      try {
+        const enrollments = await publicContestsApi.myEnrollments();
+        if (!Array.isArray(enrollments) || enrollments.length === 0) return;
+        const byTeam: Record<string, string> = {};
+        const uniqueContestIds = new Set<string>();
+        for (const e of enrollments) {
+          byTeam[e.team_id] = e.contest_id;
+          uniqueContestIds.add(e.contest_id);
+        }
+        // Resolve contest names
+        const idToName: Record<string, string> = {};
+        for (const cid of Array.from(uniqueContestIds)) {
+          try {
+            const c = await publicContestsApi.getMe(cid);
+            idToName[cid] = c.name;
+          } catch (_) {
+            try {
+              const c = await publicContestsApi.get(cid);
+              idToName[cid] = c.name;
+            } catch {
+              idToName[cid] = "Contest";
+            }
+          }
+        }
+        if (!mounted) return;
+        const mapped: Record<string, { contestId: string; contestName: string }> = {};
+        for (const [teamId, contestId] of Object.entries(byTeam)) {
+          mapped[teamId] = { contestId, contestName: idToName[contestId] || "Contest" };
+        }
+        setEnrollmentByTeam(mapped);
+      } catch (_) {
+        // ignore
+      }
+    };
+    loadPerTeamEnrollments();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   // Fetch teams
   useEffect(() => {
     const fetchTeams = async () => {
@@ -130,6 +186,96 @@ export default function TeamsPage() {
 
     fetchTeams();
   }, [isAuthenticated, router]);
+
+  // Fetch public contests (open ones)
+  useEffect(() => {
+    const loadContests = async () => {
+      try {
+        setLoadingContests(true);
+        const res = await publicContestsApi.list({ page_size: 100 });
+        const open = res.contests.filter((c) => c.status !== "completed" && c.status !== "archived");
+        setContests(open);
+      } catch (e) {
+        // ignore silently
+      } finally {
+        setLoadingContests(false);
+      }
+    };
+    loadContests();
+  }, []);
+
+  // Detect a joined contest for the current user
+  useEffect(() => {
+    let mounted = true;
+    const loadJoined = async () => {
+      try {
+        // Prefer enrollments endpoint
+        const enrollments = await publicContestsApi.myEnrollments();
+        if (Array.isArray(enrollments) && enrollments.length > 0) {
+          enrollments.sort((a, b) => new Date(b.enrolled_at).getTime() - new Date(a.enrolled_at).getTime());
+          const latest = enrollments[0];
+          try {
+            const c = await publicContestsApi.getMe(latest.contest_id);
+            if (mounted) setJoinedContest({ id: c.id, name: c.name });
+            return;
+          } catch (_) {
+            try {
+              const c = await publicContestsApi.get(latest.contest_id);
+              if (mounted) setJoinedContest({ id: c.id, name: c.name });
+              return;
+            } catch {
+              // continue to fallback
+            }
+          }
+        }
+
+        // Fallback: scan public contests' leaderboards for current user
+        const res = await publicContestsApi.list({ page_size: 100 });
+        const list = res.contests || [];
+        for (const c of list) {
+          try {
+            const lb = await publicContestsApi.leaderboard(c.id, { skip: 0, limit: 1 });
+            if (lb.currentUserEntry) {
+              if (mounted) setJoinedContest({ id: c.id, name: c.name });
+              break;
+            }
+          } catch (_) {
+            // ignore
+          }
+        }
+      } catch (_) {
+        // ignore
+      }
+    };
+    loadJoined();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const handleSelectContest = (teamId: string, contestId: string) => {
+    setSelectedContestByTeam((prev) => ({ ...prev, [teamId]: contestId }));
+  };
+
+  const handleJoinContest = async (team: TeamResponse) => {
+    const contestId = selectedContestByTeam[team.id];
+    if (!contestId) {
+      alert("Please select a contest");
+      return;
+    }
+    try {
+      setEnrollingTeamId(team.id);
+      await publicContestsApi.enroll(contestId, team.id);
+      const contestName = contests.find((c) => c.id === contestId)?.name || "Contest";
+      setEnrollSuccessByTeam((prev) => ({ ...prev, [team.id]: { contestId, contestName } }));
+      // Also update per-team enrollment map for immediate UI feedback
+      setEnrollmentByTeam((prev) => ({ ...prev, [team.id]: { contestId, contestName } }));
+    } catch (e: any) {
+      alert(e?.response?.data?.detail || e?.message || "Failed to enroll");
+    } finally {
+      setEnrollingTeamId(null);
+    }
+  };
 
   const handleDeleteTeam = async (teamId: string) => {
     if (!confirm("Are you sure you want to delete this team?")) {
@@ -258,13 +404,22 @@ export default function TeamsPage() {
               <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">
                 Your Teams ({teams.length})
               </h2>
-              <Button
-                variant="primary"
-                onClick={handleCreateNewTeam}
-                className="shadow-md w-full sm:w-auto text-base"
-              >
-                + Create New Team
-              </Button>
+              <div className="w-full sm:w-auto flex items-center gap-2">
+                <Button
+                  variant="primary"
+                  onClick={handleCreateNewTeam}
+                  className="shadow-md w-full sm:w-auto text-base"
+                >
+                  + Create New Team
+                </Button>
+                {joinedContest && (
+                  <Link href={`/leaderboard/${joinedContest.id}`} className="inline-flex">
+                    <Badge variant="success" className="whitespace-nowrap">
+                      Contest: {joinedContest.name}
+                    </Badge>
+                  </Link>
+                )}
+              </div>
             </div>
 
             {/* Teams Grid */}
@@ -321,6 +476,14 @@ export default function TeamsPage() {
                                 Cancel
                               </Button>
                             </div>
+
+                    {/* Enrollment success banner */}
+                    {enrollSuccessByTeam[team.id] && (
+                      <div className="mb-3 p-3 rounded bg-green-50 border border-green-200 text-green-800 text-sm">
+                        Joined <span className="font-semibold">{enrollSuccessByTeam[team.id].contestName}</span>.{' '}
+                        <Link href={`/contests/${enrollSuccessByTeam[team.id].contestId}`} className="underline">View contest</Link>
+                      </div>
+                    )}
                           </div>
                         ) : (
                           <>
@@ -387,6 +550,14 @@ export default function TeamsPage() {
                             Rank #{team.rank}
                           </Badge>
                         )}
+                        {enrollmentByTeam[team.id] && (
+                          <Link href={`/leaderboard/${enrollmentByTeam[team.id].contestId}`} className="inline-flex">
+                            <Badge variant="success" className="text-xs sm:text-sm">
+                              Contest: {enrollmentByTeam[team.id].contestName}
+                            </Badge>
+                          </Link>
+                        )}
+                        
                       </div>
                     </div>
 
@@ -416,8 +587,7 @@ export default function TeamsPage() {
                               </Badge>
                             </div>
                             <p className="text-xs sm:text-sm text-gray-500 truncate mt-0.5">
-                              {roleToSlotLabel(captain.role || "")} •{" "}
-                              {captain.team}
+                              {roleToSlotLabel(captain.role || "")} • {captain.team}
                             </p>
                           </div>
                         </div>
@@ -488,7 +658,34 @@ export default function TeamsPage() {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex flex-col sm:flex-row justify-end gap-2 mt-4 pt-4 border-t border-gray-200">
+                    <div className="flex flex-col sm:flex-row justify-between gap-3 mt-4 pt-4 border-t border-gray-200">
+                      {/* Join contest controls */}
+                      <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                        <select
+                          className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                          value={selectedContestByTeam[team.id] || ""}
+                          onChange={(e) => handleSelectContest(team.id, e.target.value)}
+                          disabled={loadingContests}
+                        >
+                          <option value="">-- Select contest --</option>
+                          {contests.map((c) => (
+                            <option key={c.id} value={c.id}>
+                              {c.name} ({c.status})
+                            </option>
+                          ))}
+                        </select>
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={() => handleJoinContest(team)}
+                          disabled={!selectedContestByTeam[team.id] || enrollingTeamId === team.id}
+                          className="w-full sm:w-auto"
+                        >
+                          {enrollingTeamId === team.id ? "Joining..." : "Join Contest"}
+                        </Button>
+                      </div>
+
+                      {/* Danger actions */}
                       <Button
                         variant="ghost"
                         size="sm"

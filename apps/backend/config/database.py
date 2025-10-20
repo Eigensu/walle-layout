@@ -4,6 +4,8 @@ from config.settings import get_settings
 from app.models.user import User, RefreshToken, UserProfile
 from app.models.sponsor import Sponsor
 from app.models.team import Team
+from app.models.contest import Contest
+from app.models.team_contest_enrollment import TeamContestEnrollment
 from app.models.admin.player import Player as AdminPlayer
 from app.models.admin.slot import Slot
 from app.models.admin.import_log import ImportLog
@@ -40,6 +42,8 @@ async def connect_to_mongo():
                 PublicPlayer,
                 Slot,
                 ImportLog,
+                Contest,
+                TeamContestEnrollment,
             ]
         )
         print(f"✓ Initialized Beanie ODM with database: {settings.mongodb_db_name}")

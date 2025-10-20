@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   PlayerCard,
@@ -16,7 +16,8 @@ import {
 import type { Player } from "@/components";
 import { MobileUserMenu } from "@/components/navigation/MobileUserMenu";
 import { useAuth } from "@/contexts/AuthContext";
-import { createTeam } from "@/lib/api/teams";
+import { createTeam, getUserTeams } from "@/lib/api/teams";
+import { publicContestsApi, Contest as PublicContest } from "@/lib/api/public/contests";
 import { useTeamBuilder } from "@/hooks/useTeamBuilder";
 
 // Data fetching and selection logic moved to useTeamBuilder
@@ -60,6 +61,15 @@ export default function MyTeamPage() {
   // Team submission states
   const [submitting, setSubmitting] = useState(false);
   const [teamName, setTeamName] = useState("");
+
+  // Contest enrollment states
+  const [contests, setContests] = useState<PublicContest[]>([]);
+  const [loadingContests, setLoadingContests] = useState(false);
+  const [selectedContestId, setSelectedContestId] = useState("");
+
+  // Already-enrolled contest display
+  const [enrolledContest, setEnrolledContest] = useState<{ id: string; name: string } | null>(null);
+  const [loadingEnrollment, setLoadingEnrollment] = useState(false);
 
   // Display-only label (role already set by hook to slot name)
   const roleToSlotLabel = (role: string): string => role;
@@ -114,7 +124,17 @@ export default function MyTeamPage() {
         vice_captain_id: viceCaptainId,
       };
 
-      await createTeam(teamData, token);
+      const created = await createTeam(teamData, token);
+
+      // If user selected a contest, enroll this team
+      if (selectedContestId) {
+        try {
+          await publicContestsApi.enroll(selectedContestId, created.id);
+        } catch (e: any) {
+          // Show error but still proceed to redirect
+          alert(e?.response?.data?.detail || e?.message || "Failed to enroll in contest");
+        }
+      }
 
       // Redirect to teams page
       router.push("/teams");
@@ -126,6 +146,116 @@ export default function MyTeamPage() {
     }
   };
 
+  // Load available public contests (exclude completed/archived)
+  useEffect(() => {
+    const loadContests = async () => {
+      try {
+        setLoadingContests(true);
+        const res = await publicContestsApi.list({ page_size: 100 });
+        const open = res.contests.filter(c => c.status !== "completed" && c.status !== "archived");
+        setContests(open);
+      } catch (e) {
+        // ignore silently
+      } finally {
+        setLoadingContests(false);
+      }
+    };
+    loadContests();
+  }, []);
+
+  // Load enrollment: prefer dedicated enrollments endpoint (handles private contests),
+  // then fall back to leaderboard scan and teams API.
+  useEffect(() => {
+    let mounted = true;
+    const loadEnrollment = async () => {
+      try {
+        setLoadingEnrollment(true);
+        let found: { id: string; name: string } | null = null;
+
+        // 1) Primary: use myEnrollments to get user's active enrollments
+        try {
+          const enrollments = await publicContestsApi.myEnrollments();
+          if (Array.isArray(enrollments) && enrollments.length > 0) {
+            // Pick the most recent enrollment
+            enrollments.sort((a, b) => new Date(b.enrolled_at).getTime() - new Date(a.enrolled_at).getTime());
+            const latest = enrollments[0];
+            try {
+              const contest = await publicContestsApi.getMe(latest.contest_id);
+              found = { id: contest.id, name: contest.name };
+            } catch (_) {
+              // fallback to public get if allowed
+              try {
+                const contest = await publicContestsApi.get(latest.contest_id);
+                found = { id: contest.id, name: contest.name };
+              } catch {
+                // ignore and continue
+              }
+            }
+          }
+        } catch (_) {
+          // ignore and try fallbacks
+        }
+
+        // 2) Fallback: scan public contests' leaderboards for current user entry
+        if (!found) {
+          try {
+            const res = await publicContestsApi.list({ page_size: 100 });
+            const contestsAll = res.contests || [];
+            for (const c of contestsAll) {
+              try {
+                const lb = await publicContestsApi.leaderboard(c.id, { skip: 0, limit: 1 });
+                if (lb.currentUserEntry) {
+                  found = { id: c.id, name: c.name };
+                  break;
+                }
+              } catch (_) {
+                // ignore individual contest failures
+              }
+            }
+          } catch (_) {
+            // ignore
+          }
+        }
+
+        if (!found) {
+          // fallback: use teams API if any team has contest_id set
+          const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
+          if (token) {
+            try {
+              const list = await getUserTeams(token, 0, 50);
+              const withContest = list.teams.filter((t) => !!t.contest_id);
+              if (withContest.length > 0) {
+                // pick most recently updated
+                withContest.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+                const latest = withContest[0];
+                if (latest.contest_id) {
+                  try {
+                    const contest = await publicContestsApi.getMe(latest.contest_id);
+                    found = { id: contest.id, name: contest.name };
+                  } catch (_) {
+                    const contest = await publicContestsApi.get(latest.contest_id);
+                    found = { id: contest.id, name: contest.name };
+                  }
+                }
+              }
+            } catch (_) {
+              // ignore
+            }
+          }
+        }
+        if (found && mounted) setEnrolledContest(found);
+      } catch (e) {
+        // silently ignore
+      } finally {
+        if (mounted) setLoadingEnrollment(false);
+      }
+    };
+    loadEnrollment();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-primary-50">
       {/* Header: Navbar */}
@@ -135,6 +265,23 @@ export default function MyTeamPage() {
 
       {/* Spacer to prevent content from hiding under fixed navbar */}
       <div className="h-20 sm:h-29"></div>
+
+      {/* Enrolled contest banner */}
+      {enrolledContest && (
+        <div className="px-4 sm:px-6 mb-3">
+          <div className="bg-green-50 border border-green-200 text-green-800 rounded-xl p-3 flex items-center justify-between">
+            <div>
+              <span className="font-semibold">Enrolled Contest:</span> {enrolledContest.name}
+            </div>
+            <a
+              href={`/leaderboard/${enrolledContest.id}`}
+              className="text-sm text-green-700 hover:underline"
+            >
+              View Leaderboard
+            </a>
+          </div>
+        </div>
+      )}
 
       {/* Hero Section - More compact on mobile */}
       <div className="px-4 sm:px-6 mb-4 sm:mb-8 md:mb-10">
@@ -448,6 +595,27 @@ export default function MyTeamPage() {
                       />
                     </div>
 
+                    {/* Contest Join (optional) */}
+                    <div className="mb-6">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Join a Contest (optional)</label>
+                      <select
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                        value={selectedContestId}
+                        onChange={(e) => setSelectedContestId(e.target.value)}
+                        disabled={loadingContests}
+                      >
+                        <option value="">-- Do not join a contest --</option>
+                        {contests.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.name} ({c.status})
+                          </option>
+                        ))}
+                      </select>
+                      <p className="text-xs text-gray-500 mt-1">
+                        If selected, your team will be enrolled after submission.
+                      </p>
+                    </div>
+
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                       <div
                         className={`${selectedPlayers.length > 0 ? "bg-gradient-to-br from-success-50 to-success-100 border-success-200" : "bg-gray-50 border-gray-200"} rounded-xl p-4 border`}
@@ -601,7 +769,7 @@ export default function MyTeamPage() {
               disabled={currentStep !== 3 || submitting}
               onClick={handleSubmitTeam}
             >
-              {submitting ? "Submitting..." : "Submit Team & Join Contest"}
+              {submitting ? "Submitting..." : "Submit Team"}
             </Button>
           </div>
         </div>

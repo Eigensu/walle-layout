@@ -11,7 +11,7 @@ from app.schemas.admin.player_import import (
     ImportLogResponse,
     ImportLogListResponse,
 )
-from app.utils.dependencies import get_current_user
+from app.utils.dependencies import get_admin_user
 from app.utils.import_players.import_template import generate_xlsx_template, generate_csv_template
 from app.services.player_import.import_service import PlayerImportService
 
@@ -22,7 +22,7 @@ router = APIRouter(prefix="/api/admin/players/import", tags=["Admin - Players Im
 @router.get("/template")
 async def get_template(
     format: str = Query("xlsx", pattern="^(xlsx|csv)$"),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_admin_user),
 ):
     """
     Download import template file
@@ -67,7 +67,7 @@ async def import_players(
     slot_strategy: str = Form("lookup", pattern="^(lookup|create|ignore)$"),
     header_row: int = Form(1),
     idempotency_key: Optional[str] = Form(None),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_admin_user),
 ):
     """
     Import players from Excel or CSV file
@@ -105,7 +105,7 @@ async def import_players(
 async def get_import_logs(
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1, le=100),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_admin_user),
 ):
     """Get import history logs"""
     query = ImportLog.find(ImportLog.user_id == str(current_user.id))

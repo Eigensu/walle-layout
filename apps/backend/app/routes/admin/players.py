@@ -10,7 +10,7 @@ from app.schemas.admin.player import (
     PlayerResponse,
     PlayerListResponse,
 )
-from app.utils.dependencies import get_current_user
+from app.utils.dependencies import get_admin_user
 from app.models.user import User
 
 router = APIRouter(prefix="/api/admin/players", tags=["Admin - Players"])
@@ -25,7 +25,7 @@ async def get_players(
     status: Optional[str] = Query(None, description="Filter by status"),
     sort_by: str = Query("created_at", description="Sort field"),
     sort_order: str = Query("desc", description="Sort order (asc/desc)"),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_admin_user),
 ):
     """
     Get all players with pagination, search, and filters.
@@ -95,7 +95,7 @@ async def get_players(
 @router.get("/{player_id}", response_model=PlayerResponse)
 async def get_player(
     player_id: str,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_admin_user),
 ):
     """
     Get a specific player by ID.
@@ -125,7 +125,7 @@ async def get_player(
 @router.post("", response_model=PlayerResponse, status_code=201)
 async def create_player(
     player_data: PlayerCreate,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_admin_user),
 ):
     """
     Create a new player.
@@ -176,7 +176,7 @@ async def create_player(
 async def update_player(
     player_id: str,
     player_data: PlayerUpdate,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_admin_user),
 ):
     """
     Update a player.
@@ -216,7 +216,7 @@ async def update_player(
 @router.delete("/{player_id}", status_code=204)
 async def delete_player(
     player_id: str,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_admin_user),
 ):
     """
     Delete a player.

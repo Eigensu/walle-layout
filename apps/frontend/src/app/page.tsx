@@ -2,17 +2,51 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Trophy, Users, TrendingUp, Shield, ArrowRight } from "lucide-react";
 import { PillNavbar } from "@/components/navigation/PillNavbar";
-import { UserMenu } from "@/components/navigation/UserMenu";
 import { MobileUserMenu } from "@/components/navigation/MobileUserMenu";
 import { useAuth } from "@/contexts/AuthContext";
 import { Spinner } from "@/components/ui/Loading";
+import { publicContestsApi, type Contest, type EnrollmentResponse } from "@/lib/api/public/contests";
 
 export default function HomePage() {
   const { isAuthenticated, isLoading } = useAuth();
+  const [activeContests, setActiveContests] = useState<Contest[]>([]);
+  const [loadingContests, setLoadingContests] = useState(false);
+  const [contestsError, setContestsError] = useState<string | null>(null);
+  const [joinedContestIds, setJoinedContestIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    const loadActive = async () => {
+      try {
+        setLoadingContests(true);
+        setContestsError(null);
+        const res = await publicContestsApi.list({ status: "active", page_size: 8 });
+        setActiveContests(res.contests || []);
+      } catch (e: any) {
+        setContestsError(e?.message || "Failed to load contests");
+      } finally {
+        setLoadingContests(false);
+      }
+    };
+    loadActive();
+  }, []);
+
+  // Detect contests the user is enrolled in
+  useEffect(() => {
+    const loadEnrollments = async () => {
+      try {
+        const mine: EnrollmentResponse[] = await publicContestsApi.myEnrollments();
+        const ids = new Set<string>(mine.map((e) => e.contest_id));
+        setJoinedContestIds(ids);
+      } catch {
+        // ignore when unauthenticated or endpoint unavailable
+      }
+    };
+    loadEnrollments();
+  }, []);
   const features = useMemo(
     () => [
       {
@@ -127,6 +161,64 @@ export default function HomePage() {
                   </div>
                 </motion.div>
               </div>
+            </div>
+          </section>
+
+          {/* Active Contests */}
+          <section className="mx-4 mb-10 sm:mb-12">
+            <div className="container mx-auto px-4 sm:px-6 max-w-screen-xl">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-4">Active Contests</h2>
+              {contestsError && (
+                <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm mb-4">
+                  {contestsError}
+                </div>
+              )}
+              {loadingContests ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="h-40 bg-white rounded-2xl shadow animate-pulse" />
+                  ))}
+                </div>
+              ) : activeContests.length === 0 ? (
+                <div className="bg-white border border-gray-200 rounded-2xl p-6 text-gray-600">
+                  No active contests right now. Check back soon!
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {activeContests.map((c) => (
+                    <div key={c.id} className="bg-white/80 backdrop-blur-sm rounded-2xl border border-primary-100 p-5 shadow-sm">
+                      <div className="flex items-start justify-between">
+                        <div className="min-w-0">
+                          <h3 className="text-lg sm:text-xl font-semibold text-gray-900 truncate">{c.name}</h3>
+                          {c.description && (
+                            <p className="text-sm text-gray-600 mt-0.5 line-clamp-2">{c.description}</p>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-primary-50 text-primary-700 border border-primary-200">LIVE</span>
+                          {joinedContestIds.has(c.id) && (
+                            <span className="text-xs px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200">Joined</span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-xs text-gray-500 mt-2">
+                        Ends: {new Date(c.end_at).toLocaleString()}
+                      </div>
+                      <div className="mt-4 flex items-center gap-2">
+                        {!joinedContestIds.has(c.id) ? (
+                          <Link href="/teams" className="inline-flex justify-center items-center px-4 py-2 rounded-lg bg-gradient-primary text-white text-sm font-medium shadow hover:opacity-95">
+                            Join Contest
+                          </Link>
+                        ) : (
+                          <Link href={`/leaderboard/${c.id}`} className="inline-flex justify-center items-center px-4 py-2 rounded-lg border text-sm font-medium text-primary-700 border-primary-200 hover:bg-primary-50">
+                            View Leaderboard
+                          </Link>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </section>
 
