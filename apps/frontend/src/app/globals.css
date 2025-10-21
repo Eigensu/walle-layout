@@ -82,6 +82,12 @@ body {
   outline-offset: 2px;
 }
 
+/* Override focus outline for specific interactive components */
+.nav-btn:focus,
+.nav-btn:focus-visible {
+  outline: none !important;
+}
+
 /* Custom Component Styles */
 @layer components {
 

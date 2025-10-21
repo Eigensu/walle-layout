@@ -265,42 +265,7 @@ export default function HomePage() {
             </div>
           </section>
 
-          {/* CTA Section */}
-          <section className="relative py-20 bg-gradient-primary text-white overflow-hidden rounded-3xl mx-4 mb-8 sm:mb-10">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.1),transparent_60%)]" />
-            <div className="container mx-auto px-6 text-center relative z-10 max-w-screen-xl">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-                viewport={{ once: true }}
-              >
-                <h2 className="text-4xl sm:text-5xl font-bold mb-6 drop-shadow-md">
-                  Ready to Play?
-                </h2>
-                <p className="text-lg text-white/90 mb-8 max-w-2xl mx-auto">
-                  Join thousands of cricket fans and start your fantasy league
-                  journey today
-                </p>
-                {isAuthenticated ? (
-                  <Link
-                    href="/dashboard"
-                    className="inline-flex items-center bg-white text-primary-600 font-semibold px-8 py-3 rounded-full text-lg shadow-lg hover:shadow-[0_0_25px_rgba(255,255,255,0.4)] transition-all duration-300 animate-pulse-slow"
-                  >
-                    Visit Your Dashboard
-                    <ArrowRight className="ml-2" />
-                  </Link>
-                ) : (
-                  <Link
-                    href="/auth/register"
-                    className="inline-flex items-center bg-white text-primary-600 font-semibold px-8 py-3 rounded-full text-lg shadow-lg hover:shadow-[0_0_25px_rgba(255,255,255,0.4)] transition-all duration-300 animate-pulse-slow"
-                  >
-                    Create Your Team Now
-                  </Link>
-                )}
-              </motion.div>
-            </div>
-          </section>
+          
         </>
       )}
     </div>

@@ -18,7 +18,7 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({
 }) => {
   const getRankIcon = (rank: number) => {
     if (rank === 1) {
-      return <Trophy className="w-6 h-6 text-yellow-500" />;
+      return <Trophy className="w-6 h-6 text-primary-500" />;
     } else if (rank === 2) {
       return <Medal className="w-6 h-6 text-gray-400" />;
     } else if (rank === 3) {
@@ -70,21 +70,21 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({
   if (showTopThree && entry.rank <= 3) {
     return (
       <div
-        className={`${getBackgroundClass()} rounded-2xl sm:rounded-3xl p-4 sm:p-6 transition-all duration-300 hover:shadow-xl relative overflow-hidden`}
+        className={`${getBackgroundClass()} rounded-2xl sm:rounded-3xl p-3 sm:p-4 transition-all duration-300 hover:shadow-xl relative overflow-hidden`}
       >
         {/* Background decoration */}
-        <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-primary-200/30 to-transparent rounded-full -mr-12 sm:-mr-16 -mt-12 sm:-mt-16" />
+        <div className="absolute top-0 right-0 w-20 h-20 sm:w-28 sm:h-28 bg-gradient-to-br from-primary-200/30 to-transparent rounded-full -mr-10 sm:-mr-14 -mt-10 sm:-mt-14" />
 
         <div className="relative flex flex-col items-center text-center">
           {/* Rank badge */}
-          <div className="mb-3 sm:mb-4">{getRankIcon(entry.rank)}</div>
+          <div className="mb-2 sm:mb-3">{getRankIcon(entry.rank)}</div>
 
           {/* Avatar */}
-          <div className="relative mb-3 sm:mb-4">
+          <div className="relative mb-2 sm:mb-3">
             <Avatar
               name={entry.displayName}
               size="lg"
-              className="sm:w-20 sm:h-20"
+              className="sm:w-20 sm:h-20 ring-2 ring-primary-200 shadow"
             />
             {entry.rank === 1 && (
               <div className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 bg-yellow-500 text-white rounded-full w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center text-xs sm:text-sm font-bold shadow-lg">
@@ -104,15 +104,15 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({
           </div>
 
           {/* Points */}
-          <div className="mt-2 sm:mt-3">
+          <div className="mt-1.5 sm:mt-2.5">
             <p className="text-2xl sm:text-3xl font-bold text-primary-600">
               {entry.points.toLocaleString()}
             </p>
-            <p className="text-[10px] sm:text-xs text-gray-500 mt-1">points</p>
+            <p className="text-[10px] sm:text-xs text-gray-500 mt-0.5">points</p>
           </div>
 
           {/* Rank change */}
-          <div className="mt-2">{getRankChangeIndicator(entry.rankChange)}</div>
+          <div className="mt-1">{getRankChangeIndicator(entry.rankChange)}</div>
         </div>
       </div>
     );
@@ -121,11 +121,11 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({
   // Standard leaderboard row
   return (
     <div
-      className={`${getBackgroundClass()} rounded-2xl p-3 sm:p-4 transition-all duration-300 hover:shadow-md`}
+      className={`${getBackgroundClass()} rounded-2xl p-2.5 sm:p-3 transition-all duration-300 hover:shadow-md`}
     >
-      <div className="flex items-center justify-between gap-2 sm:gap-4">
+      <div className="flex items-center justify-between gap-2 sm:gap-3">
         {/* Left side: Rank, Avatar, and Info */}
-        <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
+        <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
           {/* Rank */}
           <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-gray-50 rounded-full font-bold text-gray-700 text-sm sm:text-base flex-shrink-0">
             {entry.rank <= 3 ? getRankIcon(entry.rank) : `#${entry.rank}`}
@@ -136,7 +136,7 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({
             <Avatar
               name={entry.displayName}
               size="md"
-              className="flex-shrink-0 hidden xs:block"
+              className="flex-shrink-0 ring-2 ring-primary-200"
             />
             <div className="flex-1 min-w-0">
               <h4 className="font-semibold text-sm sm:text-base text-gray-900 truncate">
@@ -150,7 +150,7 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({
         </div>
 
         {/* Right side: Points and rank change */}
-        <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-3 flex-shrink-0">
+        <div className="flex flex-col sm:flex-row items-end sm:items-center gap-1.5 sm:gap-2.5 flex-shrink-0">
           {/* Rank change indicator - hide on very small screens */}
           <div className="hidden sm:block">
             {getRankChangeIndicator(entry.rankChange)}
@@ -168,7 +168,7 @@ export const LeaderboardCard: React.FC<LeaderboardCardProps> = ({
 
       {/* Rank change indicator - show on small screens below */}
       {entry.rankChange !== undefined && entry.rankChange !== 0 && (
-        <div className="sm:hidden mt-2 flex justify-end">
+        <div className="sm:hidden mt-1.5 flex justify-end">
           {getRankChangeIndicator(entry.rankChange)}
         </div>
       )}

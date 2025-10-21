@@ -14,6 +14,7 @@ import {
   Settings,
   LogOut,
   Info,
+  BarChart3,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -45,7 +46,7 @@ const DEFAULT_ITEMS: PillNavItem[] = [
     id: "leaderboard",
     label: "Leaderboard",
     href: "/leaderboard",
-    icon: <Trophy className="w-4 h-4" />,
+    icon: <BarChart3 className="w-4 h-4" />,
   },
   {
     id: "sponsors",
@@ -153,17 +154,17 @@ const PillNavbar: React.FC<PillNavbarProps> = ({
                   key={item.id}
                   onClick={() => handleNavigation(item.href)}
                   className={`
-                    flex items-center justify-center space-x-1.5 rounded-full font-medium transition-all duration-300 whitespace-nowrap
+                    group nav-btn flex items-center justify-center space-x-1.5 rounded-full font-medium transition-all duration-300 whitespace-nowrap outline-none focus:outline-none focus-visible:outline-none ring-0 focus:ring-0 focus-visible:ring-0 active:ring-0
                     ${isScrolled ? "px-4 py-2" : "px-6 py-2.5"}
                     ${
                       isActive
                         ? "bg-gradient-primary text-white shadow-md"
-                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                        : "text-gray-700 hover:text-primary-900 hover:bg-primary-50 active:bg-primary-100"
                     }
                   `}
                 >
                   {item.icon && (
-                    <span className={isActive ? "text-white" : "text-gray-500"}>
+                    <span className={isActive ? "text-white" : "text-gray-500 group-hover:text-primary-700 group-active:text-primary-800"}>
                       {item.icon}
                     </span>
                   )}
@@ -326,16 +327,16 @@ const PillNavbar: React.FC<PillNavbarProps> = ({
                   key={item.id}
                   onClick={() => handleNavigation(item.href)}
                   className={`
-                    w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium transition-all
+                    group nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium transition-all outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 active:ring-0
                     ${
                       isActive
                         ? "bg-gradient-primary text-white shadow-md"
-                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                        : "text-gray-700 hover:bg-primary-50 hover:text-primary-900 active:bg-primary-100"
                     }
                   `}
                 >
                   {item.icon && (
-                    <span className={isActive ? "text-white" : "text-gray-500"}>
+                    <span className={isActive ? "text-white" : "text-gray-500 group-hover:text-primary-700 group-active:text-primary-800"}>
                       {item.icon}
                     </span>
                   )}

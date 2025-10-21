@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { LeaderboardCard, LeaderboardSkeleton } from "@/components/leaderboard";
 import { publicContestsApi, type Contest, type LeaderboardResponse as ContestLeaderboardResponse } from "@/lib/api/public/contests";
 import type { LeaderboardEntry as SharedLeaderboardEntry } from "@/types/leaderboard";
-import { Trophy } from "lucide-react";
+import { Trophy, Crown } from "lucide-react";
 
 export default function ContestLeaderboardTabPage() {
   const params = useParams();
@@ -43,7 +43,7 @@ export default function ContestLeaderboardTabPage() {
   }, [contestId]);
 
   return (
-    <div className="py-4 sm:py-6">
+    <div className="py-1 sm:py-3">
       {/* Loading */}
       {isLoading && <LeaderboardSkeleton />}
 
@@ -56,7 +56,7 @@ export default function ContestLeaderboardTabPage() {
 
       {/* Content */}
       {!isLoading && !error && leaderboard && (
-        <div className="space-y-4 sm:space-y-8">
+        <div className="space-y-1 sm:space-y-3">
           {(() => {
             const entries: SharedLeaderboardEntry[] = leaderboard.entries.map((e) => ({
               rank: e.rank,
@@ -79,9 +79,19 @@ export default function ContestLeaderboardTabPage() {
 
             return (
               <div className="space-y-4 sm:space-y-8">
+                {/* Page Heading with Crowns */}
+                <div className="text-center -mt-1 sm:-mt-2">
+                  <div className="relative inline-block mb-1">
+                    <Crown className="w-7 h-7 text-primary-500/70 absolute -top-5 -left-8 hidden sm:block" />
+                    <Crown className="w-7 h-7 text-primary-500/70 absolute -top-5 -right-8 hidden sm:block" />
+                    <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-primary-300 to-primary-700 bg-clip-text text-transparent px-2">
+                      Leaderboard
+                    </h1>
+                  </div>
+                </div>
                 {/* Top 3 */}
                 {entries.length >= 3 && (
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 mb-4 sm:mb-8">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-5 mb-2 sm:mb-4">
                     <div className="sm:order-1 sm:mt-8">
                       <LeaderboardCard entry={entries[1]} showTopThree />
                     </div>
@@ -95,11 +105,11 @@ export default function ContestLeaderboardTabPage() {
                 )}
 
                 {/* Full list */}
-                <div className="bg-white/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-lg">
-                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">
+                <div className="bg-white/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-4 sm:p-5 md:p-6 shadow-lg border border-primary-100">
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-3">
                     Complete Rankings
                   </h2>
-                  <div className="space-y-2 sm:space-y-3">
+                  <div className="space-y-1 sm:space-y-2">
                     {entries.map((entry) => (
                       <LeaderboardCard
                         key={entry.rank}
