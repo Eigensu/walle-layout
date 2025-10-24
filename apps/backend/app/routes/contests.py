@@ -10,6 +10,7 @@ from app.models.contest import Contest
 from app.models.team_contest_enrollment import TeamContestEnrollment
 from app.models.team import Team
 from app.models.user import User
+from app.models.player import Player
 from app.utils.security import decode_token
 from app.schemas.contest import ContestListResponse, ContestResponse
 from app.schemas.leaderboard import LeaderboardResponseSchema, LeaderboardEntrySchema
@@ -269,6 +270,13 @@ async def enroll_in_contest(
             initial_points=existing.initial_points,
         )
 
+    # Snapshot per-player baselines at enrollment
+    player_baselines: Dict[str, float] = {}
+    if team.player_ids:
+        player_docs = await Player.find({"_id": {"$in": [PydanticObjectId(pid) for pid in team.player_ids if ObjectId.is_valid(pid)]}}).to_list()
+        for p in player_docs:
+            player_baselines[str(p.id)] = float(p.points or 0)
+
     enr = TeamContestEnrollment(
         team_id=team.id,
         contest_id=contest.id,
@@ -276,6 +284,7 @@ async def enroll_in_contest(
         status=EnrollmentStatus.ACTIVE,
         enrolled_at=datetime.utcnow(),
         initial_points=team.total_points,
+        player_initial_points=player_baselines,
     )
     await enr.insert()
 
@@ -288,4 +297,80 @@ async def enroll_in_contest(
         enrolled_at=enr.enrolled_at,
         removed_at=enr.removed_at,
         initial_points=enr.initial_points,
+    )
+
+
+class ContestTeamPlayerSchema(BaseModel):
+    id: str
+    name: str
+    team: Optional[str] = None
+    role: Optional[str] = None
+    price: float = 0.0
+    base_points: float = 0.0
+    contest_points: float = 0.0
+
+
+class ContestTeamResponse(BaseModel):
+    team_id: str
+    team_name: str
+    contest_id: str
+    base_points: float
+    contest_points: float
+    players: List[ContestTeamPlayerSchema]
+
+
+@router.get("/{contest_id}/teams/{team_id}", response_model=ContestTeamResponse)
+async def get_team_in_contest(contest_id: str, team_id: str, current_user: User = Depends(get_current_active_user)):
+    contest = await Contest.get(contest_id)
+    if not contest:
+        raise HTTPException(status_code=404, detail="Contest not found")
+
+    try:
+        team = await Team.get(PydanticObjectId(team_id))
+    except Exception:
+        raise HTTPException(status_code=404, detail="Team not found")
+    if not team or team.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Team not found")
+
+    enr = await TeamContestEnrollment.find_one({
+        "team_id": team.id,
+        "contest_id": contest.id,
+        "status": EnrollmentStatus.ACTIVE,
+    })
+    if not enr:
+        raise HTTPException(status_code=404, detail="Team is not enrolled in this contest")
+
+    # Load players
+    player_ids_valid = [PydanticObjectId(pid) for pid in team.player_ids if ObjectId.is_valid(pid)]
+    players = await Player.find({"_id": {"$in": player_ids_valid}}).to_list()
+
+    players_by_id: Dict[str, Player] = {str(p.id): p for p in players}
+    base_map = enr.player_initial_points or {}
+
+    player_items: List[ContestTeamPlayerSchema] = []
+    for pid in team.player_ids:
+        p = players_by_id.get(pid)
+        if not p:
+            continue
+        base = float(base_map.get(pid, 0.0))
+        cur = float(p.points or 0.0)
+        player_items.append(ContestTeamPlayerSchema(
+            id=pid,
+            name=p.name,
+            team=p.team,
+            role=p.role,
+            price=float(p.price or 0.0),
+            base_points=base,
+            contest_points=cur - base,
+        ))
+
+    team_points = float(team.total_points) - float(enr.initial_points or 0.0)
+
+    return ContestTeamResponse(
+        team_id=str(team.id),
+        team_name=team.team_name,
+        contest_id=str(contest.id),
+        base_points=float(enr.initial_points or 0.0),
+        contest_points=team_points,
+        players=player_items,
     )

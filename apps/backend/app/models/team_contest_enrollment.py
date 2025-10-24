@@ -1,7 +1,7 @@
 from beanie import Document, Indexed, PydanticObjectId
 from pydantic import Field
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Dict
 from app.common.enums.enrollments import EnrollmentStatus
 
 
@@ -18,6 +18,8 @@ class TeamContestEnrollment(Document):
 
     # Baseline from Team.total_points at enrollment time for Phase 1
     initial_points: float = 0.0
+    # Baseline per player: player_id -> points at enrollment time
+    player_initial_points: Dict[str, float] = Field(default_factory=dict)
 
     class Settings:
         name = "team_contest_enrollments"
