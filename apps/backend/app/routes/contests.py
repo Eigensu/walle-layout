@@ -16,13 +16,52 @@ from app.schemas.contest import ContestListResponse, ContestResponse
 from app.schemas.leaderboard import LeaderboardResponseSchema, LeaderboardEntrySchema
 from app.utils.dependencies import get_current_active_user
 from app.schemas.enrollment import EnrollmentResponse
-from app.common.enums.contests import ContestVisibility
+from app.common.enums.contests import ContestVisibility, ContestStatus
 from app.common.enums.enrollments import EnrollmentStatus
 
 router = APIRouter(prefix="/api/contests", tags=["contests"])
 
+class EnrollRequest(BaseModel):
+    team_id: str
+
+class ContestTeamPlayerSchema(BaseModel):
+    id: str
+    name: str
+    team: Optional[str] = None
+    role: Optional[str] = None
+    price: float = 0.0
+    base_points: float = 0.0
+    contest_points: float = 0.0
+
+class ContestTeamResponse(BaseModel):
+    team_id: str
+    team_name: str
+    contest_id: str
+    base_points: float
+    contest_points: float
+    players: List[ContestTeamPlayerSchema]
+
+def _compute_status(contest: Contest) -> ContestStatus:
+    now = datetime.utcnow()
+    if contest.end_at <= now:
+        return ContestStatus.COMPLETED
+    if contest.start_at <= now < contest.end_at:
+        return ContestStatus.LIVE
+    return ContestStatus.UPCOMING
+
 
 async def to_contest_response(contest: Contest) -> ContestResponse:
+    # Derive status from time window to reflect real-time lifecycle
+    computed = _compute_status(contest)
+    # Persist drift if needed (except when archived which is manual terminal state)
+    if contest.status != computed and contest.status != ContestStatus.ARCHIVED:
+        contest.status = computed
+        contest.updated_at = datetime.utcnow()
+        try:
+            await contest.save()
+        except Exception:
+            # Non-blocking: ignore persistence errors for response
+            pass
     return ContestResponse(
         id=str(contest.id),
         code=contest.code,
@@ -30,7 +69,7 @@ async def to_contest_response(contest: Contest) -> ContestResponse:
         description=contest.description,
         start_at=contest.start_at,
         end_at=contest.end_at,
-        status=contest.status,
+        status=computed,
         visibility=contest.visibility,
         points_scope=contest.points_scope,
         contest_type=contest.contest_type,
@@ -65,16 +104,26 @@ async def list_public_contests(
     q: Optional[str] = Query(None),
 ):
     conditions = [Contest.visibility == ContestVisibility.PUBLIC]
-    if status:
-        conditions.append(Contest.status == status)
+
+    # If a status filter is provided, translate it into time-window constraints
+    now = datetime.utcnow()
+    if status == ContestStatus.LIVE:
+        conditions.append(Contest.start_at <= now)
+        conditions.append(Contest.end_at > now)
+    elif status == ContestStatus.UPCOMING:
+        conditions.append(Contest.start_at > now)
+    elif status == ContestStatus.COMPLETED:
+        conditions.append(Contest.end_at <= now)
+    elif status == ContestStatus.ARCHIVED:
+        conditions.append(Contest.status == ContestStatus.ARCHIVED)
 
     query = Contest.find(conditions[0]) if conditions else Contest.find_all()
     for cond in conditions[1:]:
         query = query.find(cond)
 
     if q:
+        # Text search on code or name, then re-apply filters
         query = Contest.find(Or(RegEx(Contest.code, q, options="i"), RegEx(Contest.name, q, options="i")))
-        # still ensure visibility/public and status if provided
         for cond in conditions:
             query = query.find(cond)
 
@@ -82,8 +131,10 @@ async def list_public_contests(
     skip = (page - 1) * page_size
     rows = await query.skip(skip).limit(page_size).sort(-Contest.start_at).to_list()
 
+    # Convert to responses with computed status
+    items = [await to_contest_response(c) for c in rows]
     return {
-        "contests": [await to_contest_response(c) for c in rows],
+        "contests": items,
         "total": total,
         "page": page,
         "page_size": page_size,
@@ -219,11 +270,6 @@ async def contest_leaderboard(
 
     return LeaderboardResponseSchema(entries=entries, currentUserEntry=current_user_entry)
 
-
-class EnrollRequest(BaseModel):
-    team_id: str
-
-
 @router.post("/{contest_id}/enroll", response_model=EnrollmentResponse)
 async def enroll_in_contest(
     contest_id: str,
@@ -318,25 +364,6 @@ async def enroll_in_contest(
         removed_at=enr.removed_at,
         initial_points=enr.initial_points,
     )
-
-
-class ContestTeamPlayerSchema(BaseModel):
-    id: str
-    name: str
-    team: Optional[str] = None
-    role: Optional[str] = None
-    price: float = 0.0
-    base_points: float = 0.0
-    contest_points: float = 0.0
-
-
-class ContestTeamResponse(BaseModel):
-    team_id: str
-    team_name: str
-    contest_id: str
-    base_points: float
-    contest_points: float
-    players: List[ContestTeamPlayerSchema]
 
 
 @router.get("/{contest_id}/teams/{team_id}", response_model=ContestTeamResponse)

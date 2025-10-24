@@ -1,9 +1,8 @@
 from enum import Enum
 
 class ContestStatus(str, Enum):
-    DRAFT = "draft"
-    ACTIVE = "active"
-    PAUSED = "paused"
+    UPCOMING = "upcoming"
+    LIVE = "live"
     COMPLETED = "completed"
     ARCHIVED = "archived"
 

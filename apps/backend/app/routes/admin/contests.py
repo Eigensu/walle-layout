@@ -152,18 +152,19 @@ async def delete_contest(
         "status": EnrollmentStatus.ACTIVE,
     }).count()
 
+    # If there are active enrollments, honor force=true to unenroll and proceed.
     if active_enrollments > 0:
-        raise HTTPException(status_code=409, detail="Contest has active enrollments. Use force=true to unenroll and delete.")
-
-    if force and active_enrollments:
-        # mark all active enrollments removed
-        async for enr in TeamContestEnrollment.find({
-            "contest_id": contest.id,
-            "status": EnrollmentStatus.ACTIVE,
-        }):
-            enr.status = EnrollmentStatus.REMOVED
-            enr.removed_at = datetime.utcnow()
-            await enr.save()
+        if force:
+            # mark all active enrollments removed
+            async for enr in TeamContestEnrollment.find({
+                "contest_id": contest.id,
+                "status": EnrollmentStatus.ACTIVE,
+            }):
+                enr.status = EnrollmentStatus.REMOVED
+                enr.removed_at = datetime.utcnow()
+                await enr.save()
+        else:
+            raise HTTPException(status_code=409, detail="Contest has active enrollments. Use force=true to unenroll and delete.")
 
     await contest.delete()
     return {"message": "Contest deleted"}
