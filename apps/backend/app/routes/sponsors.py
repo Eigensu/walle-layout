@@ -84,6 +84,18 @@ async def get_sponsors(
     )
 
 
+# Accept collection GET without trailing slash to prevent 405 when clients omit the slash
+@router.get("", response_model=SponsorsListResponse)
+async def get_sponsors_no_slash(
+    tier: Optional[str] = Query(None, description="Filter by tier (platinum, gold, silver, bronze)"),
+    featured: Optional[bool] = Query(None, description="Filter by featured status"),
+    active: Optional[bool] = Query(True, description="Filter by active status"),
+    page: int = Query(1, ge=1, description="Page number"),
+    page_size: int = Query(100, ge=1, le=100, description="Items per page")
+):
+    return await get_sponsors(tier=tier, featured=featured, active=active, page=page, page_size=page_size)
+
+
 @router.get("/{sponsor_id}", response_model=SponsorDetailResponse)
 async def get_sponsor(sponsor_id: str):
     """
@@ -102,6 +114,15 @@ async def get_sponsor(sponsor_id: str):
     return SponsorDetailResponse(
         sponsor=SponsorResponse(**sponsor_to_response(sponsor))
     )
+
+
+# Accept collection POST without trailing slash to prevent 307 redirects that can drop headers in some clients
+@router.post("", response_model=SponsorDetailResponse, status_code=status.HTTP_201_CREATED)
+async def create_sponsor_no_slash(
+    sponsor_data: SponsorCreate,
+    current_user: User = Depends(get_current_active_user)
+):
+    return await create_sponsor(sponsor_data, current_user)
 
 
 # Admin endpoints (authentication required)
