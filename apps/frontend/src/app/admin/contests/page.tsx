@@ -5,6 +5,8 @@ import Link from "next/link";
 import { adminContestsApi, Contest, ContestCreate, ContestType } from "@/lib/api/admin/contests";
 import { API_BASE_URL } from "@/common/consts";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { AlertDialog } from "@/components/ui/AlertDialog";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 export default function AdminContestsPage() {
   const [contests, setContests] = useState<Contest[]>([]);
@@ -26,6 +28,22 @@ export default function AdminContestsPage() {
   const [availableTeams, setAvailableTeams] = useState<string[]>([]);
   const [selectedAllowedTeams, setSelectedAllowedTeams] = useState<string[]>([]);
   const [allowedDropdownOpen, setAllowedDropdownOpen] = useState<boolean>(false);
+
+  // Alert dialog
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertTitle, setAlertTitle] = useState<string | undefined>(undefined);
+  const [alertMessage, setAlertMessage] = useState("");
+  const showAlert = (message: string, title?: string) => {
+    setAlertMessage(message);
+    setAlertTitle(title);
+    setAlertOpen(true);
+  };
+
+  // Delete dialogs
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [showForceDeleteDialog, setShowForceDeleteDialog] = useState(false);
 
   const load = async () => {
     try {
@@ -68,7 +86,7 @@ export default function AdminContestsPage() {
     try {
       setCreating(true);
       if (!form.code.trim() || !form.name.trim()) {
-        alert("Code and Name are required");
+        showAlert("Code and Name are required", "Validation");
         return;
       }
       const payload: ContestCreate = {
@@ -81,33 +99,80 @@ export default function AdminContestsPage() {
       setSelectedAllowedTeams([]);
       await load();
     } catch (e: any) {
-      alert(e?.message || "Failed to create contest");
+      showAlert(e?.message || "Failed to create contest", "Create failed");
     } finally {
       setCreating(false);
     }
   };
 
   const remove = async (id: string) => {
-    if (!confirm("Delete contest? If it has enrollments, use force delete.")) return;
+    setDeleteTargetId(id);
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTargetId) return;
     try {
-      await adminContestsApi.delete(id);
+      setDeleting(true);
+      await adminContestsApi.delete(deleteTargetId);
+      setShowDeleteDialog(false);
+      setDeleteTargetId(null);
       await load();
     } catch (e: any) {
-      const detail = e?.response?.data?.detail;
-      if (detail?.includes("active enrollments")) {
-        if (confirm("Active enrollments found. Force delete?")) {
-          await adminContestsApi.delete(id, true);
-          await load();
-          return;
-        }
+      const detail = e?.response?.data?.detail as string | undefined;
+      // If active enrollments, ask for force delete
+      if (detail && detail.includes("active enrollments")) {
+        setShowDeleteDialog(false);
+        setShowForceDeleteDialog(true);
+        return;
       }
-      alert(e?.message || "Failed to delete");
+      showAlert(e?.message || "Failed to delete", "Delete failed");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const confirmForceDelete = async () => {
+    if (!deleteTargetId) return;
+    try {
+      setDeleting(true);
+      await adminContestsApi.delete(deleteTargetId, true);
+      setShowForceDeleteDialog(false);
+      setDeleteTargetId(null);
+      await load();
+    } catch (e: any) {
+      showAlert(e?.message || "Failed to force delete", "Delete failed");
+    } finally {
+      setDeleting(false);
     }
   };
 
   return (
     <ProtectedRoute>
       <div className="max-w-5xl mx-auto p-4">
+        <AlertDialog open={alertOpen} title={alertTitle} message={alertMessage} onClose={() => setAlertOpen(false)} />
+        <ConfirmDialog
+          open={showDeleteDialog}
+          title="Delete this contest?"
+          description="This action cannot be undone."
+          cancelText="Cancel"
+          confirmText={deleting ? "Deleting..." : "Delete"}
+          destructive
+          loading={deleting}
+          onCancel={() => { if (!deleting) { setShowDeleteDialog(false); setDeleteTargetId(null); } }}
+          onConfirm={confirmDelete}
+        />
+        <ConfirmDialog
+          open={showForceDeleteDialog}
+          title="Force delete contest?"
+          description="Active enrollments were found. This will permanently remove the contest and its enrollments."
+          cancelText="Cancel"
+          confirmText={deleting ? "Deleting..." : "Force Delete"}
+          destructive
+          loading={deleting}
+          onCancel={() => { if (!deleting) { setShowForceDeleteDialog(false); } }}
+          onConfirm={confirmForceDelete}
+        />
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-2xl font-semibold">Admin · Contests</h1>
           <Link href="/admin" className="px-3 py-1 rounded border hover:bg-gray-50">Back</Link>

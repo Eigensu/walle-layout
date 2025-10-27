@@ -7,6 +7,8 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { adminContestsApi, Contest, EnrollmentResponse } from "@/lib/api/admin/contests";
 import { adminUsersApi, UsersWithTeamsResponse, AdminUserTeamsResponse } from "@/lib/api/admin/users";
 import { publicContestsApi, LeaderboardEntry } from "@/lib/api/public/contests";
+import { AlertDialog } from "@/components/ui/AlertDialog";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 export default function AdminManageContestPage() {
   const params = useParams<{ contestId: string }>();
@@ -26,6 +28,21 @@ export default function AdminManageContestPage() {
   const [selectedTeamIds, setSelectedTeamIds] = useState<Record<string, boolean>>({});
   const [enrolling, setEnrolling] = useState(false);
 
+  // Alert dialog state
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertTitle, setAlertTitle] = useState<string | undefined>(undefined);
+  const [alertMessage, setAlertMessage] = useState("");
+  const showAlert = (message: string, title?: string) => {
+    setAlertMessage(message);
+    setAlertTitle(title);
+    setAlertOpen(true);
+  };
+
+  // Unenroll confirmation state
+  const [showUnenrollDialog, setShowUnenrollDialog] = useState(false);
+  const [unenrollTeamId, setUnenrollTeamId] = useState<string | null>(null);
+  const [unenrolling, setUnenrolling] = useState(false);
+
   const loadContest = async () => {
     const c = await adminContestsApi.get(contestId);
     setContest(c);
@@ -43,7 +60,7 @@ export default function AdminManageContestPage() {
       // Reload leaderboard state accordingly
       await loadLeaderboard();
     } catch (e: any) {
-      alert(e?.message || "Failed to toggle contest status");
+      showAlert(e?.message || "Failed to toggle contest status", "Update failed");
     } finally {
       setToggling(false);
     }
@@ -78,7 +95,7 @@ export default function AdminManageContestPage() {
   const enrollSelected = async () => {
     const team_ids = Object.keys(selectedTeamIds).filter((k) => selectedTeamIds[k]);
     if (team_ids.length === 0) {
-      alert("Select at least one team");
+      showAlert("Select at least one team", "Validation");
       return;
     }
     try {
@@ -86,22 +103,32 @@ export default function AdminManageContestPage() {
       await adminContestsApi.enrollTeams(contestId, { team_ids });
       await loadUserTeams(selectedUserId);
       await loadLeaderboard();
-      alert("Enrolled successfully");
+      showAlert("Enrolled successfully", "Success");
     } catch (e: any) {
-      alert(e?.message || "Failed to enroll teams");
+      showAlert(e?.message || "Failed to enroll teams", "Enrollment failed");
     } finally {
       setEnrolling(false);
     }
   };
 
   const unenrollTeam = async (teamId: string) => {
-    if (!confirm("Unenroll this team?")) return;
+    setUnenrollTeamId(teamId);
+    setShowUnenrollDialog(true);
+  };
+
+  const confirmUnenroll = async () => {
+    if (!unenrollTeamId) return;
     try {
-      await adminContestsApi.unenroll(contestId, { team_ids: [teamId] });
+      setUnenrolling(true);
+      await adminContestsApi.unenroll(contestId, { team_ids: [unenrollTeamId] });
       await loadUserTeams(selectedUserId);
       await loadLeaderboard();
+      setShowUnenrollDialog(false);
+      setUnenrollTeamId(null);
     } catch (e: any) {
-      alert(e?.message || "Failed to unenroll");
+      showAlert(e?.message || "Failed to unenroll", "Unenroll failed");
+    } finally {
+      setUnenrolling(false);
     }
   };
 
@@ -123,6 +150,18 @@ export default function AdminManageContestPage() {
   return (
     <ProtectedRoute>
       <div className="max-w-6xl mx-auto p-4 space-y-6">
+        <AlertDialog open={alertOpen} title={alertTitle} message={alertMessage} onClose={() => setAlertOpen(false)} />
+        <ConfirmDialog
+          open={showUnenrollDialog}
+          title="Unenroll this team?"
+          description="This will remove the team from this contest."
+          cancelText="Cancel"
+          confirmText={unenrolling ? "Unenrolling..." : "Unenroll"}
+          destructive
+          loading={unenrolling}
+          onCancel={() => { if (!unenrolling) { setShowUnenrollDialog(false); setUnenrollTeamId(null); } }}
+          onConfirm={confirmUnenroll}
+        />
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-semibold">Admin · Manage Contest</h1>
           <Link className="text-blue-600 hover:underline" href="/admin/contests">Back to Contests</Link>

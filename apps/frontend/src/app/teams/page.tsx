@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { PillNavbar, Card, Avatar, Badge, Button } from "@/components";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { AlertDialog } from "@/components/ui/AlertDialog";
 import { MobileUserMenu } from "@/components/navigation/MobileUserMenu";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -66,6 +68,18 @@ export default function TeamsPage() {
   const [enrollSuccessByTeam, setEnrollSuccessByTeam] = useState<
     Record<string, { contestId: string; contestName: string }>
   >({});
+  // Delete confirmation dialog
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  // Reusable alert dialog
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertTitle, setAlertTitle] = useState<string | undefined>(undefined);
+  const showAlert = (message: string, title?: string) => {
+    setAlertMessage(message);
+    setAlertTitle(title);
+    setAlertOpen(true);
+  };
   // Joined contest to display beside Create New Team
   const [joinedContest, setJoinedContest] = useState<{
     id: string;
@@ -341,7 +355,7 @@ export default function TeamsPage() {
   const handleJoinContest = async (team: TeamResponse) => {
     const contestId = selectedContestByTeam[team.id];
     if (!contestId) {
-      alert("Please select a contest");
+      showAlert("Please select a contest", "Selection required");
       return;
     }
     try {
@@ -359,17 +373,13 @@ export default function TeamsPage() {
         [team.id]: { contestId, contestName },
       }));
     } catch (e: any) {
-      alert(e?.response?.data?.detail || e?.message || "Failed to enroll");
+      const message = e?.response?.data?.detail || e?.message || "Failed to enroll";
+      showAlert(message, "Enrollment failed");
     } finally {
       setEnrollingTeamId(null);
     }
   };
-
   const handleDeleteTeam = async (teamId: string) => {
-    if (!confirm("Are you sure you want to delete this team?")) {
-      return;
-    }
-
     try {
       setDeletingTeamId(teamId);
       const token = localStorage.getItem(LS_KEYS.ACCESS_TOKEN);
@@ -378,10 +388,17 @@ export default function TeamsPage() {
       await deleteTeam(teamId, token);
       setTeams((prev) => prev.filter((t) => t.id !== teamId));
     } catch (err: any) {
-      alert(`Error: ${err.message || "Failed to delete team"}`);
+      showAlert(`Error: ${err.message || "Failed to delete team"}`, "Delete failed");
     } finally {
       setDeletingTeamId(null);
+      setShowDeleteDialog(false);
+      setDeleteTargetId(null);
     }
+  };
+
+  const openDeleteDialog = (teamId: string) => {
+    setDeleteTargetId(teamId);
+    setShowDeleteDialog(true);
   };
 
   const handleStartRename = (team: TeamResponse) => {
@@ -396,7 +413,7 @@ export default function TeamsPage() {
 
   const handleSaveRename = async (teamId: string) => {
     if (!editingTeamName.trim()) {
-      alert("Team name cannot be empty");
+      showAlert("Team name cannot be empty", "Validation");
       return;
     }
 
@@ -414,7 +431,7 @@ export default function TeamsPage() {
       setEditingTeamId(null);
       setEditingTeamName("");
     } catch (err: any) {
-      alert(`Error: ${err.message || "Failed to rename team"}`);
+      showAlert(`Error: ${err.message || "Failed to rename team"}`, "Rename failed");
     } finally {
       setRenamingTeamId(null);
     }
@@ -450,7 +467,7 @@ export default function TeamsPage() {
       );
       setTeams((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
     } catch (e: any) {
-      alert(e?.message || "Failed to set captain");
+      showAlert(e?.message || "Failed to set captain", "Update failed");
     } finally {
       setUpdatingTeamId(null);
       setShowActionModal(false);
@@ -469,7 +486,7 @@ export default function TeamsPage() {
       );
       setTeams((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
     } catch (e: any) {
-      alert(e?.message || "Failed to set vice-captain");
+      showAlert(e?.message || "Failed to set vice-captain", "Update failed");
     } finally {
       setUpdatingTeamId(null);
       setShowActionModal(false);
@@ -507,7 +524,7 @@ export default function TeamsPage() {
       setActionPlayerId(null);
       setActionTeamId(null);
     } catch (e: any) {
-      alert(e?.message || "Failed to replace player");
+      showAlert(e?.message || "Failed to replace player", "Update failed");
     } finally {
       setUpdatingTeamId(null);
     }
@@ -915,6 +932,25 @@ export default function TeamsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-primary-50">
+
+      <ConfirmDialog
+        open={showDeleteDialog && !!deleteTargetId}
+        title="Delete this team?"
+        description="This action cannot be undone. The team will be permanently removed."
+        confirmText={deletingTeamId === deleteTargetId ? "Deleting..." : "Delete"}
+        cancelText="Cancel"
+        destructive
+        loading={deletingTeamId === deleteTargetId}
+        onCancel={() => { if (!deletingTeamId) { setShowDeleteDialog(false); setDeleteTargetId(null);} }}
+        onConfirm={() => deleteTargetId && handleDeleteTeam(deleteTargetId)}
+      />
+
+      <AlertDialog
+        open={alertOpen}
+        title={alertTitle}
+        message={alertMessage}
+        onClose={() => setAlertOpen(false)}
+      />
       <PillNavbar
         mobileMenuContent={isAuthenticated ? <MobileUserMenu /> : undefined}
       />
@@ -1282,7 +1318,7 @@ export default function TeamsPage() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleDeleteTeam(team.id)}
+                        onClick={() => openDeleteDialog(team.id)}
                         disabled={deletingTeamId === team.id}
                         className="text-red-600 hover:text-red-700 hover:bg-red-50 w-full sm:w-auto"
                       >

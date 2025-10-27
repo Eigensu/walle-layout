@@ -27,6 +27,7 @@ import {
   type EnrollmentResponse,
 } from "@/lib/api/public/contests";
 import { useTeamBuilder } from "@/hooks/useTeamBuilder";
+import { AlertDialog } from "@/components/ui/AlertDialog";
 
 export default function ContestTeamBuilderPage() {
   const { isAuthenticated } = useAuth();
@@ -75,6 +76,16 @@ export default function ContestTeamBuilderPage() {
   // Team submission states
   const [submitting, setSubmitting] = useState(false);
   const [teamName, setTeamName] = useState("");
+  const [showNameDialog, setShowNameDialog] = useState(false);
+  // Reusable alert dialog
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertTitle, setAlertTitle] = useState<string | undefined>(undefined);
+  const showAlert = (message: string, title?: string) => {
+    setAlertMessage(message);
+    setAlertTitle(title);
+    setAlertOpen(true);
+  };
 
   // Selected contest is fixed from route
   const [selectedContestId, setSelectedContestId] = useState<string>("");
@@ -188,15 +199,15 @@ export default function ContestTeamBuilderPage() {
   const handleSubmitTeam = async () => {
     if (!isAuthenticated) return;
     if (!teamName.trim()) {
-      alert("Please enter a team name");
+      setShowNameDialog(true);
       return;
     }
     if (!captainId) {
-      alert("Please select a captain");
+      showAlert("Please select a captain", "Validation");
       return;
     }
     if (!viceCaptainId) {
-      alert("Please select a vice-captain");
+      showAlert("Please select a vice-captain", "Validation");
       return;
     }
 
@@ -231,10 +242,9 @@ export default function ContestTeamBuilderPage() {
           try {
             await publicContestsApi.enroll(selectedContestId, created.id);
           } catch (e: any) {
-            alert(
-              e?.response?.data?.detail ||
-                e?.message ||
-                "Failed to enroll in contest"
+            showAlert(
+              e?.response?.data?.detail || e?.message || "Failed to enroll in contest",
+              "Enrollment failed"
             );
           }
         }
@@ -242,7 +252,7 @@ export default function ContestTeamBuilderPage() {
       }
     } catch (err: any) {
       console.error("Failed to submit team:", err);
-      alert(err.message || "Failed to submit team");
+      showAlert(err.message || "Failed to submit team", "Submission failed");
     } finally {
       setSubmitting(false);
     }
@@ -258,6 +268,69 @@ export default function ContestTeamBuilderPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-primary-50">
+
+      <AlertDialog
+        open={alertOpen}
+        title={alertTitle}
+        message={alertMessage}
+        onClose={() => setAlertOpen(false)}
+      />
+
+      {/* Team name required dialog */}
+      {showNameDialog && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        >
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={() => setShowNameDialog(false)}
+            aria-hidden="true"
+          />
+          <div className="relative w-full max-w-md rounded-2xl bg-white shadow-xl border border-primary-200">
+            <div className="p-5 sm:p-6">
+              <div className="mb-2 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-primary text-white text-xs font-semibold shadow">
+                <span className="w-1.5 h-1.5 rounded-full bg-white/90" />
+                Required
+              </div>
+              <h3 className="text-lg sm:text-xl font-semibold text-primary-700">Please enter a team name</h3>
+              <p className="mt-2 text-sm text-gray-600">You need a name to create and enroll your team.</p>
+
+              <div className="mt-4">
+                <input
+                  type="text"
+                  value={teamName}
+                  onChange={(e) => setTeamName(e.target.value)}
+                  placeholder="e.g., Golden Strikers"
+                  className="w-full rounded-xl border border-primary-200 bg-white px-4 py-2.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-primary/20 focus:border-primary-400"
+                />
+              </div>
+
+              <div className="mt-5 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowNameDialog(false)}
+                  className="px-4 py-2 rounded-full text-sm font-medium text-gray-700 hover:bg-gray-50 border border-gray-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (teamName.trim()) {
+                      setShowNameDialog(false);
+                    }
+                  }}
+                  className="px-5 py-2.5 rounded-full text-sm font-semibold text-white bg-gradient-primary shadow hover:shadow-[0_0_20px_rgba(191,171,121,0.35)]"
+                >
+                  Continue
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Enrolled banner */}
       {enrolledHere && (
         <div className="px-4 sm:px-6 mb-3">
@@ -459,7 +532,7 @@ export default function ContestTeamBuilderPage() {
                             selectedPlayers={selectedPlayers}
                             onPlayerSelect={handlePlayerSelect}
                             maxSelections={16}
-                            onBlockedSelect={(reason) => alert(reason)}
+                            onBlockedSelect={(reason) => showAlert(reason, "Selection limit")}
                             compact={true}
                             compactShowPrice={false}
                             isPlayerDisabled={(player) => {
