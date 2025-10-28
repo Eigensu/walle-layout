@@ -242,7 +242,7 @@ export function TeamCard({
       </div>
 
       {/* Actions */}
-      <div className="flex flex-col sm:flex-row justify-end gap-3 mt-4 pt-4 border-t border-gray-200">
+      <div className="flex flex-col sm:flex-row justify-end gap-3 mt-4">
         <Button
           variant="ghost"
           size="sm"

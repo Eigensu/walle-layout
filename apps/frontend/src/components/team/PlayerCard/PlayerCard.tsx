@@ -28,12 +28,11 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
       <div
         className={`
           flex items-center gap-2.5 sm:gap-3 p-3 sm:p-4 rounded-xl border-2 transition-all
-          ${
-            disabled && !isSelected
-              ? "border-gray-200 bg-gray-50 opacity-50 cursor-not-allowed"
-              : isSelected
-                ? "border-primary-400 bg-primary-50/30 cursor-pointer shadow-sm"
-                : "border-gray-200 hover:border-gray-300 bg-white cursor-pointer hover:shadow-sm"
+          ${disabled && !isSelected
+            ? "border-gray-200 bg-gray-50 opacity-50 cursor-not-allowed"
+            : isSelected
+              ? "border-primary-400 bg-primary-50/30 cursor-pointer shadow-sm"
+              : "border-gray-200 hover:border-gray-300 bg-white cursor-pointer hover:shadow-sm"
           }
           ${className}
         `}
@@ -115,12 +114,11 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
     <Card
       className={`
         relative transition-all duration-300
-        ${
-          disabled && !isSelected
-            ? "border-2 border-gray-200 bg-gray-50 opacity-50 cursor-not-allowed"
-            : isSelected
-              ? "cursor-pointer border-2 border-primary-300 bg-white hover:shadow-medium"
-              : "cursor-pointer border-2 border-gray-200 hover:border-gray-300 hover:shadow-medium"
+        ${disabled && !isSelected
+          ? "border-2 border-gray-200 bg-gray-50 opacity-50 cursor-not-allowed"
+          : isSelected
+            ? "cursor-pointer border-2 border-primary-300 bg-white hover:shadow-medium"
+            : "cursor-pointer border-2 border-gray-200 hover:border-gray-300 hover:shadow-medium"
         }
         ${className}
       `}
