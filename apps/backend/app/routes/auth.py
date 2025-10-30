@@ -230,10 +230,9 @@ async def reset_password_by_mobile(payload: ResetPasswordByMobile):
     # Normalize input by digits to compare fairly
     input_digits = ''.join(ch for ch in payload.mobile if ch.isdigit())
 
-    user = await User.find_one(User.mobile.exists(True))
     matched_user = None
     # Since mobile may be stored with symbols/spaces, scan users with a mobile set
-    async for u in User.find(User.mobile.exists(True)):
+    async for u in User.find(User.mobile != None):
         digits = ''.join(ch for ch in (u.mobile or '') if ch.isdigit())
         if digits and digits == input_digits:
             matched_user = u
