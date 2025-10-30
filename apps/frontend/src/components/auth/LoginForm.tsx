@@ -10,6 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Input } from "./Input";
 import { Button } from "@/components/ui/Button";
 import { Zap } from "lucide-react";
+import { ForgotPasswordModal } from "./ForgotPasswordModal";
 
 // Validation schema
 const loginSchema = z.object({
@@ -24,6 +25,7 @@ export function LoginForm() {
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [forgotOpen, setForgotOpen] = useState(false);
 
   const {
     register,
@@ -109,7 +111,13 @@ export function LoginForm() {
               />
               <span className="ml-2 text-sm text-gray-700">Remember me</span>
             </label>
-            {/* Placeholder for future password reset */}
+            <button
+              type="button"
+              className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+              onClick={() => setForgotOpen(true)}
+            >
+              Forgot password?
+            </button>
           </div>
 
           {/* Submit Button */}
@@ -135,6 +143,7 @@ export function LoginForm() {
           </div>
         </form>
       </div>
+      <ForgotPasswordModal open={forgotOpen} onClose={() => setForgotOpen(false)} />
       {/* Footer Note */}
       <p className="text-center text-xs text-gray-500 mt-4">
         By continuing, you agree to our Terms of Service and Privacy Policy
