@@ -196,7 +196,7 @@ REFRESH_TOKEN_EXPIRE_DAYS=7
 
 # MongoDB Database
 MONGODB_URL=mongodb://localhost:27017
-MONGODB_DB_NAME=walle_fantasy
+MONGODB_DB_NAME=world-tower
 # For MongoDB Atlas (Cloud):
 # MONGODB_URL=mongodb+srv://username:password@cluster.mongodb.net/?retryWrites=true&w=majority
 
@@ -471,7 +471,7 @@ class Settings(BaseSettings):
 
     # MongoDB Database
     mongodb_url: str = Field(default="mongodb://localhost:27017", alias="MONGODB_URL")
-    mongodb_db_name: str = Field(default="walle_fantasy", alias="MONGODB_DB_NAME")
+    mongodb_db_name: str = Field(default="world-tower", alias="MONGODB_DB_NAME")
 
     # API Configuration
     api_host: str = Field(default="0.0.0.0", alias="API_HOST")
@@ -1147,17 +1147,17 @@ The API endpoints and data structures remain compatible since we're using the sa
 - **Create App User:**
 
   ```javascript
-  use walle_fantasy
+  use world-tower
   db.createUser({
     user: "walle_app",
     pwd: "apppassword",
-    roles: [{ role: "readWrite", db: "walle_fantasy" }]
+    roles: [{ role: "readWrite", db: "world-tower" }]
   })
   ```
 
 - **Connection String with Auth:**
   ```bash
-  MONGODB_URL=mongodb://walle_app:apppassword@localhost:27017/walle_fantasy?authSource=walle_fantasy
+  MONGODB_URL=mongodb://walle_app:apppassword@localhost:27017/world-tower?authSource=world-tower
   ```
 
 #### Network Security
@@ -1493,13 +1493,13 @@ MONGODB_URL=mongodb://localhost:27017
 #### Production (Self-Hosted)
 
 ```bash
-MONGODB_URL=mongodb://username:password@mongodb-server:27017/walle_fantasy?authSource=admin
+MONGODB_URL=mongodb://username:password@mongodb-server:27017/world-tower?authSource=admin
 ```
 
 #### Production (MongoDB Atlas)
 
 ```bash
-MONGODB_URL=mongodb+srv://username:password@cluster.mongodb.net/walle_fantasy?retryWrites=true&w=majority
+MONGODB_URL=mongodb+srv://username:password@cluster.mongodb.net/world-tower?retryWrites=true&w=majority
 ```
 
 ### 11.4 Backup Strategy
@@ -1508,10 +1508,10 @@ MONGODB_URL=mongodb+srv://username:password@cluster.mongodb.net/walle_fantasy?re
 
 ```bash
 # Backup entire database
-mongodump --uri="mongodb://username:password@localhost:27017/walle_fantasy" --out=/backups/$(date +%Y%m%d)
+mongodump --uri="mongodb://username:password@localhost:27017/world-tower" --out=/backups/$(date +%Y%m%d)
 
 # Restore from backup
-mongorestore --uri="mongodb://username:password@localhost:27017/walle_fantasy" /backups/20251002/walle_fantasy
+mongorestore --uri="mongodb://username:password@localhost:27017/world-tower" /backups/20251002/world-tower
 ```
 
 #### Automated Backup (cron job)
@@ -1545,10 +1545,10 @@ mongod --auth --dbpath /data/db
 mongosh
 
 # Connect with credentials
-mongosh "mongodb://username:password@localhost:27017/walle_fantasy"
+mongosh "mongodb://username:password@localhost:27017/world-tower"
 
 # Connect to MongoDB Atlas
-mongosh "mongodb+srv://cluster.mongodb.net/walle_fantasy" --username your_user
+mongosh "mongodb+srv://cluster.mongodb.net/world-tower" --username your_user
 ```
 
 ### MongoDB Shell Commands
@@ -1558,7 +1558,7 @@ mongosh "mongodb+srv://cluster.mongodb.net/walle_fantasy" --username your_user
 show dbs
 
 // Use database
-use walle_fantasy
+use world-tower
 
 // Show collections
 show collections
@@ -1724,7 +1724,7 @@ JWT_EXPIRE_MINUTES=1440
 
 # MongoDB
 MONGODB_URL=mongodb://localhost:27017
-MONGODB_DB_NAME=walle_fantasy
+MONGODB_DB_NAME=world-tower
 
 # CORS
 CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000

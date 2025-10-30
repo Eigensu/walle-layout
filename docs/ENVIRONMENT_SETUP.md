@@ -54,7 +54,7 @@ JWT_SECRET_KEY=your-jwt-secret-key-change-this-in-production-32chars-minimum
 
 # MongoDB
 MONGODB_URL=mongodb://localhost:27017
-MONGODB_DB_NAME=walle_fantasy
+MONGODB_DB_NAME=world-tower
 ```
 
 ### 3. Generate Secure Keys
@@ -96,7 +96,7 @@ JWT_EXPIRE_MINUTES=1440
 
 # MongoDB Database
 MONGODB_URL=mongodb://localhost:27017
-MONGODB_DB_NAME=walle_fantasy
+MONGODB_DB_NAME=world-tower
 
 # CORS
 CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000

@@ -67,7 +67,7 @@ export default function ContestDetailsPage() {
           <div className="text-center mb-2 -mt-12">
             <div className="flex justify-center mt-0">
               <Image
-                src="/TPL S11 Sponsor/Title Sponsor.png"
+                src="/World Tower Premier League Season 7 Sponsor/Title Sponsor.png"
                 alt="Title Sponsor"
                 width={180}
                 height={180}

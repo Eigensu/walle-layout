@@ -93,7 +93,7 @@ apps/backend/
 
    ```
    ✓ Connected to MongoDB at mongodb://localhost:27017
-   ✓ Initialized Beanie ODM with database: walle_fantasy
+   ✓ Initialized Beanie ODM with database: world-tower
    ✓ Application startup complete
    ```
 
@@ -209,7 +209,7 @@ JWT_EXPIRE_MINUTES=1440
 
 # MongoDB (local)
 MONGODB_URL=mongodb://localhost:27017
-MONGODB_DB_NAME=walle_fantasy
+MONGODB_DB_NAME=world-tower
 
 # CORS
 CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
@@ -288,16 +288,16 @@ API_PORT=8000
 
 ```bash
 # View users
-mongosh walle_fantasy --eval "db.users.find().pretty()"
+mongosh world-tower --eval "db.users.find().pretty()"
 
 # View refresh tokens
-mongosh walle_fantasy --eval "db.refresh_tokens.find().pretty()"
+mongosh world-tower --eval "db.refresh_tokens.find().pretty()"
 
 # Count documents
-mongosh walle_fantasy --eval "db.users.countDocuments()"
+mongosh world-tower --eval "db.users.countDocuments()"
 
 # View indexes
-mongosh walle_fantasy --eval "db.users.getIndexes()"
+mongosh world-tower --eval "db.users.getIndexes()"
 ```
 
 **Backend:**

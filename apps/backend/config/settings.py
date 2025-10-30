@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     
     # MongoDB Database
     mongodb_url: str = Field(default="mongodb://localhost:27017", alias="MONGODB_URL")
-    mongodb_db_name: str = Field(default="walle_fantasy", alias="MONGODB_DB_NAME")
+    mongodb_db_name: str = Field(default="world-tower", alias="MONGODB_DB_NAME")
     
     # API Configuration
     api_host: str = Field(default="0.0.0.0", alias="API_HOST")

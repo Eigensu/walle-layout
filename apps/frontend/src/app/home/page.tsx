@@ -157,7 +157,7 @@ export default function HomePage() {
                   className="text-center md:text-left"
                 >
                   <h1 className="text-4xl sm:text-5xl lg:text-5xl font-extrabold text-primary-700 tracking-tight leading-tight mb-4">
-                    Tyrant Fantasy League
+                    World Tower Fantasy League
                   </h1>
                   <p className="text-lg sm:text-xl text-gray-700 mb-8 max-w-xl mx-auto md:mx-0 leading-relaxed">
                     Build your dream team, compete with friends, and rise to the
@@ -441,7 +441,7 @@ export default function HomePage() {
                           />
                         </div>
                       </div>
-                      
+
                     </div>
                   ))}
                 </div>
