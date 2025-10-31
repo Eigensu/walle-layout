@@ -3,12 +3,17 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Player } from "@/lib/api/admin/players";
 import { playersApi } from "@/lib/api/admin/players";
-import { adminContestsApi, type Contest, type PlayerPointsResponseItem } from "@/lib/api/admin/contests";
+import {
+  adminContestsApi,
+  type Contest,
+  type PlayerPointsResponseItem,
+} from "@/lib/api/admin/contests";
 import { getErrorMessage } from "@/lib/api/client";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { Loader2, AlertCircle, Users } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { EditPointsModal } from "../players/EditPointsModal";
+import { formatPoints } from "@/lib/utils";
 
 export function TeamsEditSection() {
   const [players, setPlayers] = useState<Player[]>([]);
@@ -17,7 +22,9 @@ export function TeamsEditSection() {
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
   const [teamFilter, setTeamFilter] = useState<string>("");
   // Map of contest-scoped points for selected contest: player_id -> points
-  const [contestPointsMap, setContestPointsMap] = useState<Record<string, number>>({});
+  const [contestPointsMap, setContestPointsMap] = useState<
+    Record<string, number>
+  >({});
   const [contestPointsLoading, setContestPointsLoading] = useState(false);
 
   // Contest selection state
@@ -85,9 +92,12 @@ export function TeamsEditSection() {
     (async () => {
       try {
         setContestPointsLoading(true);
-        const res: PlayerPointsResponseItem[] = await adminContestsApi.getPlayerPoints(selectedContestId);
+        const res: PlayerPointsResponseItem[] =
+          await adminContestsApi.getPlayerPoints(selectedContestId);
         const map: Record<string, number> = {};
-        res.forEach((r) => { map[r.player_id] = r.points ?? 0; });
+        res.forEach((r) => {
+          map[r.player_id] = r.points ?? 0;
+        });
         setContestPointsMap(map);
       } catch {
         setContestPointsMap({});
@@ -235,7 +245,7 @@ export function TeamsEditSection() {
                               {p.name}
                             </td>
                             <td className="px-3 sm:px-4 py-3 text-sm font-semibold text-gray-900">
-                              {((contestPointsMap[p.id] ?? 0)).toFixed(1)}
+                              {formatPoints(contestPointsMap[p.id] ?? 0)}
                             </td>
                             <td className="px-3 sm:px-4 py-3 text-right">
                               <Button
@@ -278,9 +288,12 @@ export function TeamsEditSection() {
             // Refresh the contest points after save
             if (!selectedContestId) return;
             try {
-              const res: PlayerPointsResponseItem[] = await adminContestsApi.getPlayerPoints(selectedContestId);
+              const res: PlayerPointsResponseItem[] =
+                await adminContestsApi.getPlayerPoints(selectedContestId);
               const map: Record<string, number> = {};
-              res.forEach((r) => { map[r.player_id] = r.points ?? 0; });
+              res.forEach((r) => {
+                map[r.player_id] = r.points ?? 0;
+              });
               setContestPointsMap(map);
             } finally {
               // also refresh global list in case UI needs it

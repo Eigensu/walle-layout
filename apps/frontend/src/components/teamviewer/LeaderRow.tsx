@@ -1,5 +1,6 @@
 "use client";
 
+import { formatPoints } from "@/lib/utils";
 import React from "react";
 import { Avatar, Badge } from "@/components";
 
@@ -32,10 +33,17 @@ export function LeaderRow({
           : "bg-secondary-50 border-secondary-200")
       }
     >
-      <Avatar name={name} src={image} size="sm" gradientClassName={gradientClassName} />
+      <Avatar
+        name={name}
+        src={image}
+        size="sm"
+        gradientClassName={gradientClassName}
+      />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <p className="text-sm sm:text-base font-semibold text-gray-900 truncate">{name}</p>
+          <p className="text-sm sm:text-base font-semibold text-gray-900 truncate">
+            {name}
+          </p>
           <Badge
             variant={isCaptain ? "warning" : "secondary"}
             size="sm"
@@ -49,7 +57,7 @@ export function LeaderRow({
         </p>
       </div>
       <div className="text-right text-xs sm:text-sm font-medium text-success-700 whitespace-nowrap">
-        {Math.floor(points)} pts
+        {formatPoints(points)} pts
       </div>
     </div>
   );

@@ -90,8 +90,8 @@ export function TeamCard({
 
   const displayPoints =
     contestIdParam && contestData
-      ? Math.floor(contestData.contest_points || 0)
-      : Math.floor(team.total_points || 0);
+      ? contestData.contest_points || 0
+      : team.total_points || 0;
 
   return (
     <Card className="p-4 sm:p-6 border-2 border-gray-200 hover:border-primary-300 transition-all hover:shadow-lg">
@@ -200,9 +200,9 @@ export function TeamCard({
                 const entry = contestData.players.find(
                   (p) => p.id === captain.id
                 );
-                return Math.floor(entry?.contest_points || 0);
+                return entry?.contest_points || 0;
               }
-              return Math.floor(captain.points || 0);
+              return captain.points || 0;
             })()}
           />
         )}
@@ -219,9 +219,9 @@ export function TeamCard({
                 const entry = contestData.players.find(
                   (p) => p.id === viceCaptain.id
                 );
-                return Math.floor(entry?.contest_points || 0);
+                return entry?.contest_points || 0;
               }
-              return Math.floor(viceCaptain.points || 0);
+              return viceCaptain.points || 0;
             })()}
           />
         )}

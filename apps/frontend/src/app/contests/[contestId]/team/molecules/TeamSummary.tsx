@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { formatPoints } from "@/lib/utils";
 import { Button, Card } from "@/components";
 import { useRouter } from "next/navigation";
 
@@ -13,12 +14,18 @@ export interface TeamSummaryProps {
   loadingTeam: boolean;
 }
 
-export function TeamSummary({ contestId, team, loadingTeam }: TeamSummaryProps) {
+export function TeamSummary({
+  contestId,
+  team,
+  loadingTeam,
+}: TeamSummaryProps) {
   const router = useRouter();
   return (
     <>
       <div className="flex items-center justify-between gap-3">
-        <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Your Team</h3>
+        <h3 className="text-lg sm:text-xl font-semibold text-gray-900">
+          Your Team
+        </h3>
         <Button
           variant="ghost"
           onClick={() => router.push(`/contests/${contestId}`)}
@@ -47,16 +54,25 @@ export function TeamSummary({ contestId, team, loadingTeam }: TeamSummaryProps) 
         <Card className="p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
           <div className="min-w-0">
             <div className="text-xs sm:text-sm text-gray-500">Team Name</div>
-            <div className="text-base sm:text-lg font-semibold text-gray-900 truncate">{team.team_name}</div>
+            <div className="text-base sm:text-lg font-semibold text-gray-900 truncate">
+              {team.team_name}
+            </div>
             <div className="text-xs sm:text-sm text-gray-600 mt-1">
-              Total Points: <span className="font-semibold text-success-700">{Math.floor(team.total_points)}</span>
+              Total Points:{" "}
+              <span className="font-semibold text-success-700">
+                {formatPoints(team.total_points)}
+              </span>
             </div>
           </div>
           <div className="flex gap-2 w-full sm:w-auto">
             <Button
               variant="primary"
               className="w-full sm:w-auto"
-              onClick={() => router.push(`/teams?contest_id=${encodeURIComponent(String(contestId || ""))}`)}
+              onClick={() =>
+                router.push(
+                  `/teams?contest_id=${encodeURIComponent(String(contestId || ""))}`
+                )
+              }
             >
               View Details
             </Button>

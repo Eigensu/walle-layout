@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Avatar } from "@/components";
+import { formatPoints } from "@/lib/utils";
 
 export interface SquadPlayerItem {
   id: string;
@@ -48,8 +49,8 @@ export function SquadList({
         .filter((p) => !excluded.has(p.id))
         .map((player) => {
           const points = contestMap.has(player.id)
-            ? Math.floor(contestMap.get(player.id) || 0)
-            : Math.floor(player.points || 0);
+            ? contestMap.get(player.id) || 0
+            : player.points || 0;
           return (
             <div
               key={player.id}
@@ -69,7 +70,7 @@ export function SquadList({
                 <p className="text-xs text-gray-500 truncate">{player.team}</p>
               </div>
               <div className="text-right text-xs sm:text-sm font-medium text-success-600 whitespace-nowrap">
-                {points} pts
+                {formatPoints(points)} pts
               </div>
             </div>
           );

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { formatPoints } from "@/lib/utils";
 import Link from "next/link";
 import { Badge } from "@/components";
 
@@ -23,7 +24,7 @@ export function ContestMetaBadges({
     <div className={"flex flex-wrap gap-2 " + className}>
       {typeof totalPoints === "number" && totalPoints > 0 && (
         <Badge variant="warning" className="text-xs sm:text-sm">
-          {Math.floor(totalPoints)} pts
+          {formatPoints(totalPoints)} pts
         </Badge>
       )}
       {typeof rank === "number" && (

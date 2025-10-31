@@ -1,8 +1,15 @@
 "use client";
 
 import React from "react";
+import { formatPoints } from "@/lib/utils";
 
-export function PointsBadge({ points, className = "" }: { points: number; className?: string }) {
+export function PointsBadge({
+  points,
+  className = "",
+}: {
+  points: number;
+  className?: string;
+}) {
   return (
     <div
       className={
@@ -11,7 +18,7 @@ export function PointsBadge({ points, className = "" }: { points: number; classN
       }
       aria-label="Team points"
     >
-      {Math.floor(points)} pts
+      {formatPoints(points)} pts
     </div>
   );
 }

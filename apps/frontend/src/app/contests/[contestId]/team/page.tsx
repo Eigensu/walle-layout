@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { formatPoints } from "@/lib/utils";
 import { useRouter, useParams } from "next/navigation";
 import {
   PlayerCard,
@@ -772,7 +773,7 @@ export default function ContestTeamBuilderPage() {
                                   </div>
                                   <div className="text-right">
                                     <div className="font-medium text-success-600">
-                                      {player.points} pts
+                                      {formatPoints(player.points || 0)} pts
                                     </div>
                                   </div>
                                 </div>
@@ -851,7 +852,7 @@ export default function ContestTeamBuilderPage() {
                                     </div>
                                   </div>
                                   <div className="text-right text-sm text-success-600">
-                                    {Math.floor(p.points)} pts
+                                    {formatPoints(p.points || 0)} pts
                                   </div>
                                 </button>
                               ))}
