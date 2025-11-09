@@ -6,7 +6,7 @@ from datetime import datetime
 class PlayerBase(BaseModel):
     name: str = Field(..., min_length=1, max_length=100)
     team: str = Field(..., min_length=1, max_length=100)
-    points: float = Field(default=0.0, ge=0)
+    points: float = Field(default=0.0)
     status: str = Field(default="Active", description="Active, Inactive, Injured")
     price: float = Field(default=8.0, ge=0)
     slot: Optional[str] = None
@@ -21,7 +21,7 @@ class PlayerCreate(PlayerBase):
 class PlayerUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=1, max_length=100)
     team: Optional[str] = Field(None, min_length=1, max_length=100)
-    points: Optional[float] = Field(None, ge=0)
+    points: Optional[float] = None
     status: Optional[str] = None
     price: Optional[float] = Field(None, ge=0)
     slot: Optional[str] = None
