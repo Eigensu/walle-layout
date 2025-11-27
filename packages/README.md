@@ -1,6 +1,6 @@
 # Packages
 
-This directory contains shared packages used across the Fantasy11 monorepo.
+This directory contains shared packages used across the Walle Layout (MWPL) monorepo.
 
 ## Structure
 
@@ -15,52 +15,66 @@ packages/
 ## Package Descriptions
 
 ### 📦 `@fantasy11/env`
+
 Environment configuration package with validation using Zod schema.
 
 **Features:**
+
 - Environment variable validation
 - Type-safe environment access
 - Shared configuration across frontend and backend
 - Development/production environment detection
 
 **Usage:**
+
 ```typescript
-import { validateFrontendEnv, type FrontendEnv } from '@fantasy11/env';
+import { validateFrontendEnv, type FrontendEnv } from "@fantasy11/env";
 ```
 
 ### 📦 `@fantasy11/ui`
+
 Shared React UI components library.
 
 **Features:**
+
 - Reusable React components
 - TypeScript support
 - Tailwind CSS styling
 - Component documentation
 
 **Usage:**
+
 ```typescript
-import { Button } from '@fantasy11/ui';
+import { Button } from "@fantasy11/ui";
 ```
 
 ### 📦 `@fantasy11/constants`
+
 Application-wide constants and type definitions.
 
 **Features:**
+
 - API route constants
 - Business logic constants (team formation, points system)
 - UI constants (colors, breakpoints)
 - Type definitions
 
 **Usage:**
+
 ```typescript
-import { API_ROUTES, TEAM_FORMATION, POINTS_SYSTEM } from '@fantasy11/constants';
+import {
+  API_ROUTES,
+  TEAM_FORMATION,
+  POINTS_SYSTEM,
+} from "@fantasy11/constants";
 ```
 
 ## Development
 
 Each package includes:
+
 - `package.json` - Package configuration
-- `tsconfig.json` - TypeScript configuration  
+- `tsconfig.json` - TypeScript configuration
 - `src/` - Source code directory
 - Build and development scripts
 

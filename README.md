@@ -1,25 +1,26 @@
-# Fantasy11 - Monorepo
+# Walle Layout (mwpl) - Monorepo
 
-A modern monorepo setup for Fantasy11 cricket platform using Turborepo, Next.js, and FastAPI.
+This repository contains the Walle Layout (MWPL) monorepo — a multi-application workspace that ships a Next.js frontend, a FastAPI backend, and a set of shared packages and utilities.
 
 ## Project Structure
 
 ```
-fantasy11-monorepo/
+mwpl/
 ├── apps/
-│   ├── frontend/          # Next.js 14 frontend application
+│   ├── frontend/          # Next.js frontend application (app dir)
 │   └── backend/           # FastAPI backend application
-├── packages/
-│   └── ui/               # Shared UI components
-├── package.json          # Root package.json with workspace configuration
-└── turbo.json           # Turborepo configuration
+├── frontend/              # Optional standalone public frontend (legacy)
+├── packages/              # Shared workspace packages (env / constants / ui)
+├── docs/                  # Project documentation
+├── package.json           # Root workspace scripts & configuration
+└── turbo.json             # Turborepo configuration
 ```
 
 ## Tech Stack
 
 ### Frontend
 
-- **Next.js 14** - React framework with App Router
+- **Next.js 15** - React framework with App Router
 - **TypeScript** - Type safety
 - **Tailwind CSS** - Utility-first CSS framework
 - **React 18** - Latest React features
@@ -75,20 +76,34 @@ This will start:
 - Frontend at http://localhost:3000
 - Backend at http://localhost:8000
 
+If you prefer to run apps individually:
+
+```bash
+# Frontend only
+cd apps/frontend && pnpm dev
+
+# Backend only (venv or use package script)
+cd apps/backend
+python -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
+pnpm run dev  # uses uvicorn script from apps/backend/package.json
+```
+
 ## Available Scripts
 
-- `pnpm dev` - Start all applications in development mode
-- `pnpm build` - Build all applications
-- `pnpm lint` - Lint all applications
-- `pnpm clean` - Clean all build artifacts
-- `pnpm format` - Format code with Prettier
+- `pnpm dev` - Start all applications in development mode (turbo run dev)
+- `pnpm build` - Build all applications (turbo run build)
+- `pnpm lint` - Lint all applications (turbo run lint)
+- `pnpm format` - Format code across the workspace using Prettier
+- `pnpm clean` - Clean all build artifacts in workspace
+- `pnpm test` - Run tests for all packages / apps (if any)
 
 ## Features
 
 ### Current Features
 
 - ✅ Monorepo setup with Turborepo
-- ✅ Next.js 14 with App Router
+- ✅ Next.js 15 with App Router
 - ✅ FastAPI backend with sample endpoints
 - ✅ Shared UI component library
 - ✅ TypeScript configuration
@@ -143,7 +158,7 @@ See [docs/ENVIRONMENT_SETUP.md](./docs/ENVIRONMENT_SETUP.md) for:
 - Troubleshooting guide
 - Migration instructions
 
-**Important:** Both frontend and backend load from the root `.env` file. Do not create separate `.env` files in `apps/frontend` or `apps/backend`.
+> **Important:** The root `.env` is the primary source for environment variables. App-level overrides like `.env.local` are allowed for local development, but keep secrets out of git and prefer a single source of truth for shared values.
 
 ## Development
 
@@ -161,10 +176,10 @@ cd apps/backend && pip install <package-name> && pip freeze > requirements.txt
 # Shared UI
 cd packages/ui && pnpm add <package-name>
 
-# Add to specific workspace from root
-pnpm add <package-name> --filter @fantasy11/frontend
-pnpm add <package-name> --filter @fantasy11/backend
-pnpm add <package-name> --filter @fantasy11/ui
+# Add to a specific workspace from root
+pnpm add <package-name> --filter ./apps/frontend
+pnpm add <package-name> --filter ./apps/backend
+pnpm add <package-name> --filter ./packages/ui
 ```
 
 ### Creating New Shared Packages
