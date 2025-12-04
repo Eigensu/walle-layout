@@ -114,7 +114,7 @@ export function HeroCarousel({
     return (
         <div className={`${className}`}>
             {/* Title Display - Above Carousel */}
-            {currentImage.subtitle && (
+            {currentImage.title && (
                 <div className="mb-4 mt-4">
                     <AnimatePresence mode="wait">
                         <motion.p
@@ -125,7 +125,7 @@ export function HeroCarousel({
                             transition={{ duration: 0.3 }}
                             className="text-primary-600 font-bold text-2xl text-center"
                         >
-                            {currentImage.subtitle}
+                            {currentImage.title}
                         </motion.p>
                     </AnimatePresence>
                 </div>

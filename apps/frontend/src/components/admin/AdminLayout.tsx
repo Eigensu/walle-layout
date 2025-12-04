@@ -7,9 +7,10 @@ import { TeamsEditSection } from "./points/TeamsEditSection";
 import { SponsorsSection } from "./sponsors/SponsorsSection";
 import { ContestsSection } from "./contests/ContestsSection";
 import { SlotsSection } from "./slots/SlotsSection";
-import { Users, Award, Trophy, Grid3x3, Home } from "lucide-react";
+import { CarouselSection } from "./carousel/CarouselSection";
+import { Users, Award, Trophy, Grid3x3, Home, Image as ImageIcon } from "lucide-react";
 
-type Section = "players" | "sponsors" | "contests" | "slots" | "teamsEdit";
+type Section = "players" | "sponsors" | "contests" | "slots" | "teamsEdit" | "carousel";
 
 export function AdminLayout() {
   const [activeSection, setActiveSection] = useState<Section>("players");
@@ -21,6 +22,7 @@ export function AdminLayout() {
     { id: "contests" as Section, label: "Contests", icon: Trophy },
     { id: "slots" as Section, label: "Slots", icon: Grid3x3 },
     { id: "teamsEdit" as Section, label: "Edit by Teams", icon: Users },
+    { id: "carousel" as Section, label: "Carousel Settings", icon: ImageIcon },
   ];
 
   const renderSection = () => {
@@ -35,6 +37,8 @@ export function AdminLayout() {
         return <SlotsSection />;
       case "teamsEdit":
         return <TeamsEditSection />;
+      case "carousel":
+        return <CarouselSection />;
       default:
         return <PlayersSection />;
     }
@@ -99,16 +103,14 @@ export function AdminLayout() {
                       aria-selected={isActive}
                       aria-controls={`panel-${id}`}
                       onClick={() => setActiveSection(id)}
-                      className={`group flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
-                        isActive
-                          ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow"
-                          : "text-gray-700 hover:text-gray-900 hover:bg-white"
-                      }`}
+                      className={`group flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${isActive
+                        ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow"
+                        : "text-gray-700 hover:text-gray-900 hover:bg-white"
+                        }`}
                     >
                       <Icon
-                        className={`w-4 h-4 transition-colors ${
-                          isActive ? "text-white" : "text-gray-500 group-hover:text-gray-700"
-                        }`}
+                        className={`w-4 h-4 transition-colors ${isActive ? "text-white" : "text-gray-500 group-hover:text-gray-700"
+                          }`}
                       />
                       {label}
                     </button>

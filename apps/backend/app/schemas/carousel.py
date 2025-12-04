@@ -23,7 +23,7 @@ class CarouselImageUpdate(BaseModel):
 
 class CarouselImageResponse(BaseModel):
     """Schema for carousel image API response"""
-    _id: str
+    id: str = Field(serialization_alias="_id")
     title: Optional[str] = None
     subtitle: Optional[str] = None
     image_url: Optional[str] = None
@@ -33,7 +33,7 @@ class CarouselImageResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    model_config = {"from_attributes": True}
+    model_config = {"from_attributes": True, "populate_by_name": True}
 
 
 class CarouselImagesListResponse(BaseModel):
