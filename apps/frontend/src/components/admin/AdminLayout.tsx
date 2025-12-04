@@ -12,7 +12,11 @@ import { Users, Award, Trophy, Grid3x3, Home, Image as ImageIcon } from "lucide-
 
 type Section = "players" | "sponsors" | "contests" | "slots" | "teamsEdit" | "carousel";
 
-export function AdminLayout() {
+interface AdminLayoutProps {
+  children?: React.ReactNode;
+}
+
+export function AdminLayout({ children }: AdminLayoutProps = {}) {
   const [activeSection, setActiveSection] = useState<Section>("players");
   const router = useRouter();
 
@@ -123,7 +127,7 @@ export function AdminLayout() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {renderSection()}
+        {children || renderSection()}
       </div>
     </div>
   );
