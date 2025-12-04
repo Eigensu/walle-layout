@@ -14,6 +14,8 @@ import {
   type Contest,
   type EnrollmentResponse,
 } from "@/lib/api/public/contests";
+import { getActiveCarouselImages, type CarouselImage } from "@/lib/api/public/carousel";
+import { HeroCarousel } from "@/components/home/HeroCarousel";
 import { ROUTES } from "@/common/consts";
 import { useRouter } from "next/navigation";
 
@@ -28,6 +30,8 @@ export default function HomePage() {
   );
   const [liveContests, setLiveContests] = useState<Contest[]>([]);
   const [loadingLive, setLoadingLive] = useState(false);
+  const [carouselImages, setCarouselImages] = useState<CarouselImage[]>([]);
+  const [loadingCarousel, setLoadingCarousel] = useState(true);
 
   useEffect(() => {
     const loadActive = async () => {
@@ -46,6 +50,49 @@ export default function HomePage() {
       }
     };
     loadActive();
+  }, []);
+
+  // Load carousel images - use sponsor logos as temporary carousel
+  useEffect(() => {
+    const loadCarousel = async () => {
+      try {
+        setLoadingCarousel(true);
+
+        // Try to get carousel images first
+        let images = await getActiveCarouselImages();
+
+        // If no carousel images, use sponsor logos as carousel
+        if (images.length === 0) {
+          try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/v1/sponsors/?active=true&page_size=10`);
+            if (response.ok) {
+              const data = await response.json();
+              // Convert sponsors to carousel format
+              images = data.sponsors.map((sponsor: any, index: number) => ({
+                _id: sponsor._id,
+                title: sponsor.name,
+                subtitle: sponsor.description || `${sponsor.tier} Sponsor`,
+                image_url: sponsor.logo,
+                link_url: sponsor.website,
+                display_order: index,
+                active: true,
+                created_at: sponsor.created_at,
+                updated_at: sponsor.updated_at,
+              }));
+            }
+          } catch (e) {
+            console.error("Failed to load sponsors for carousel:", e);
+          }
+        }
+
+        setCarouselImages(images);
+      } catch (e) {
+        console.error("Failed to load carousel images:", e);
+      } finally {
+        setLoadingCarousel(false);
+      }
+    };
+    loadCarousel();
   }, []);
 
   // Humanize time remaining until a given ISO date string
@@ -144,73 +191,56 @@ export default function HomePage() {
 
           {/* Spacer to prevent content from hiding under fixed navbar */}
           <div className="h-20"></div>
-          {/* Hero Section */}
-          <section className="relative rounded-3xl mx-4 mb-8 sm:mb-10">
-            {/* Content Container */}
-            <div className="relative z-10 container mx-auto px-4 sm:px-6 max-w-screen-xl">
-              <div className="grid md:grid-cols-2 gap-12 items-center py-16 sm:py-20 lg:py-24">
-                {/* Column 1: Text */}
-                <motion.div
-                  initial={{ opacity: 0, x: -30 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.8 }}
-                  className="text-center md:text-left"
-                >
-                  <h1 className="text-4xl sm:text-5xl lg:text-5xl font-extrabold text-primary-700 tracking-tight leading-tight mb-4">
-                    MWPL Season 2 Fantasy League
-                  </h1>
-                  <p className="text-lg sm:text-xl text-gray-700 mb-8 max-w-xl mx-auto md:mx-0 leading-relaxed">
-                    Build your dream team, compete with friends, and rise to the
-                    top!
-                  </p>
-                  <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start items-center">
-                    {isAuthenticated ? (
-                      <Link
-                        href="/contests"
-                        className="inline-flex items-center px-10 py-4 rounded-full text-lg font-semibold text-white bg-gradient-primary shadow-lg hover:shadow-[0_0_20px_rgba(191,171,121,0.5)] transition-all duration-300 group"
-                      >
-                        Explore Contests
-                        <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
-                      </Link>
-                    ) : (
-                      <Link
-                        href="/auth/login"
-                        className="inline-flex items-center px-10 py-4 rounded-full text-lg font-semibold text-white bg-gradient-primary shadow-lg hover:shadow-[0_0_20px_rgba(191,171,121,0.5)] transition-all duration-300 group"
-                      >
-                        Get Started
-                        <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
-                      </Link>
-                    )}
-                  </div>
-                </motion.div>
 
-                {/* Column 2: Visual Placeholder */}
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.8, delay: 0.2 }}
-                  className="hidden md:flex justify-center items-center"
-                >
-                  <div className="w-full h-80 bg-gradient-to-br from-primary-100 to-primary-50 rounded-2xl flex items-center justify-center border border-primary-200 shadow-lg">
-                    <div className="text-center">
-                      <Image
-                        src="/logo.jpeg"
-                        alt="Wall-E Arena"
-                        width={200}
-                        height={200}
-                        className="rounded-3xl shadow-2xl object-cover mx-auto mb-4"
-                        priority
-                      />
-                      <p className="text-primary-700 text-2xl font-bold">
-                        Wall-E Arena
-                      </p>
-                      <p className="text-sm text-primary-600 mt-2">
-                        Your Fantasy Cricket Partner
-                      </p>
+          {/* Hero Section - Full Width Carousel */}
+          <section className="relative mx-4 mb-8 sm:mb-10">
+            <div className="relative z-10 container mx-auto px-4 sm:px-6 max-w-screen-xl">
+              {loadingCarousel ? (
+                <div className="w-full h-96 md:h-[500px] bg-gradient-to-br from-primary-100 to-primary-50 rounded-3xl flex items-center justify-center">
+                  <Spinner size="lg" />
+                </div>
+              ) : carouselImages.length > 0 ? (
+                <HeroCarousel images={carouselImages} />
+              ) : (
+                // Fallback hero section when no carousel images
+                <div className="w-full h-64 md:h-80 bg-gradient-to-br from-primary-100 to-primary-50 rounded-3xl flex items-center justify-center border border-primary-200 shadow-lg">
+                  <div className="text-center px-6">
+                    <Image
+                      src="/logo.jpeg"
+                      alt="Wall-E Arena"
+                      width={200}
+                      height={200}
+                      className="rounded-3xl shadow-2xl object-cover mx-auto mb-6"
+                      priority
+                    />
+                    <h1 className="text-4xl sm:text-5xl font-extrabold text-primary-700 tracking-tight leading-tight mb-4">
+                      MWPL Season 2 Fantasy League
+                    </h1>
+                    <p className="text-lg sm:text-xl text-gray-700 mb-8 max-w-xl mx-auto leading-relaxed">
+                      Build your dream team, compete with friends, and rise to the top!
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                      {isAuthenticated ? (
+                        <Link
+                          href="/contests"
+                          className="inline-flex items-center px-10 py-4 rounded-full text-lg font-semibold text-white bg-gradient-primary shadow-lg hover:shadow-[0_0_20px_rgba(191,171,121,0.5)] transition-all duration-300 group"
+                        >
+                          Explore Contests
+                          <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
+                        </Link>
+                      ) : (
+                        <Link
+                          href="/auth/login"
+                          className="inline-flex items-center px-10 py-4 rounded-full text-lg font-semibold text-white bg-gradient-primary shadow-lg hover:shadow-[0_0_20px_rgba(191,171,121,0.5)] transition-all duration-300 group"
+                        >
+                          Get Started
+                          <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
+                        </Link>
+                      )}
                     </div>
                   </div>
-                </motion.div>
-              </div>
+                </div>
+              )}
             </div>
           </section>
 

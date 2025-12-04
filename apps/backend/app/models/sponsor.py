@@ -36,7 +36,7 @@ class Sponsor(Document):
 
     class Settings:
         name = "sponsors"  # MongoDB collection name
-        use_state_management = True
+        use_state_management = False  # Disabled to avoid HttpUrl encoding issues
         indexes = [
             "name",
             "tier",
