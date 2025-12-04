@@ -4,7 +4,7 @@
 
 export const sponsorLogoMap: Record<string, string> = {
   // Map by exact sponsor name as seen in UI/API
-  CHADIYALI: "/MWPL Season 2 Sponsor/Auction Partner.png",
+  CHADIYALI: "/mwpl-season-2-sponsors/auction-partner.png",
   // Add more mappings here as needed
 };
 
@@ -13,8 +13,8 @@ function normalizeKey(value?: string) {
 }
 
 // Build candidate local paths from description-based convention.
-// Example: description "Auction Partner" => "/MWPL Season 2 Sponsor/Auction Partner.png"
-const DESCRIPTION_BASE_DIR = "/MWPL Season 2 Sponsor"; // under public/
+// Example: description "Auction Partner" => "/mwpl-season-2-sponsors/auction-partner.png"
+const DESCRIPTION_BASE_DIR = "/mwpl-season-2-sponsors"; // under public/
 const CANDIDATE_EXTS = [".png", ".webp", ".jpg", ".jpeg"]; // try common formats
 
 function buildCandidatesFromDescription(desc?: string): string[] {

@@ -152,3 +152,64 @@ async def open_sponsor_logo_stream(file_id: str):
         content_type = meta.get("content_type")
 
     return stream, (content_type or "application/octet-stream")
+
+
+async def upload_carousel_image_to_gridfs(file: UploadFile, filename_prefix: str) -> str:
+    """Upload carousel image to GridFS (bucket 'carousel_images') and return file id"""
+    _validate_image_file(file)
+
+    file.file.seek(0, 2)
+    size = file.file.tell()
+    file.file.seek(0)
+    if size > MAX_FILE_SIZE:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"File too large. Maximum size: {MAX_FILE_SIZE / 1024 / 1024}MB",
+        )
+
+    db: AsyncIOMotorDatabase = get_database()
+    bucket = AsyncIOMotorGridFSBucket(db, bucket_name="carousel_images")
+    data = file.file.read()
+    filename = f"{filename_prefix}"
+    metadata = {"content_type": file.content_type}
+    file_id = await bucket.upload_from_stream(filename, data, metadata=metadata)
+    return str(file_id)
+
+
+async def open_carousel_image_stream(file_id: str):
+    """Open a download stream for carousel image from GridFS"""
+    try:
+        oid = ObjectId(file_id)
+    except Exception:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid file id")
+
+    db: AsyncIOMotorDatabase = get_database()
+    bucket = AsyncIOMotorGridFSBucket(db, bucket_name="carousel_images")
+
+    try:
+        stream = await bucket.open_download_stream(oid)
+    except NoFile:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Image not found")
+
+    file_doc = await bucket.find({"_id": oid}).to_list(length=1)
+    content_type: Optional[str] = None
+    if file_doc:
+        meta = file_doc[0].get("metadata") or {}
+        content_type = meta.get("content_type")
+
+    return stream, (content_type or "application/octet-stream")
+
+
+async def delete_carousel_image_from_gridfs(file_id: str) -> bool:
+    """Delete a carousel image file from the 'carousel_images' GridFS bucket"""
+    try:
+        oid = ObjectId(file_id)
+    except Exception:
+        return False
+    db: AsyncIOMotorDatabase = get_database()
+    bucket = AsyncIOMotorGridFSBucket(db, bucket_name="carousel_images")
+    try:
+        await bucket.delete(oid)
+        return True
+    except Exception:
+        return False
