@@ -69,7 +69,7 @@ export default function ContestDetailsPage() {
           <div className="text-center mb-2 -mt-12">
             <div className="flex justify-center mt-0">
               <Image
-                src="/MWPL Season 2 Sponsor/Title Sponsor.png"
+                src="/mwpl-season-2-sponsors/title-sponsor.png"
                 alt="Title Sponsor"
                 width={180}
                 height={180}

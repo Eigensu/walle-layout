@@ -33,6 +33,12 @@ const nextConfig = {
         port: "",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "walle-layout-production.up.railway.app",
+        port: "",
+        pathname: "/api/**",
+      },
     ],
   },
   async rewrites() {
