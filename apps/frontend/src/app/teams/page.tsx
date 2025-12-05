@@ -24,7 +24,8 @@ import { ReplacePlayerModal } from "@/components/team/Edit/ReplacePlayerModal";
 // Team viewer components
 import { ActionModal } from "@teamviewer/molecules/ActionModal";
 import { HeroHeader } from "@teamviewer/molecules/HeroHeader";
-import { TeamCard as TeamCardView } from "@teamviewer/organisms/TeamCard";
+import { TeamViewer } from "@teamviewer/organisms/TeamViewer";
+import type { TeamViewMode } from "@teamviewer/types";
 
 type ApiPlayer = {
   id: string;
@@ -554,7 +555,9 @@ export default function TeamsPage() {
         />
         <div className="h-20 sm:h-24"></div>
         <div className="container mx-auto px-4 py-8">
-          <div className="text-center text-gray-500 py-12">Loading your teams...</div>
+          <div className="text-center text-gray-500 py-12">
+            Loading your teams...
+          </div>
         </div>
       </div>
     );
@@ -592,7 +595,10 @@ export default function TeamsPage() {
       />
       <div className="h-20 sm:h-24"></div>
 
-      <HeroHeader title="My Fantasy Teams" subtitle="Manage and track your fantasy cricket teams" />
+      <HeroHeader
+        title="My Fantasy Teams"
+        subtitle="Manage and track your fantasy cricket teams"
+      />
 
       <main className="container mx-auto px-4 sm:px-6 py-4 sm:py-8 max-w-none">
         {error ? (
@@ -622,8 +628,8 @@ export default function TeamsPage() {
           </Card>
         ) : (
           <>
-            {/* Create New Team Button */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
+            {/* Create New Team Button - Hidden on mobile */}
+            <div className="hidden sm:flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
               <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">
                 Your Teams ({visibleTeams.length})
               </h2>
@@ -641,7 +647,7 @@ export default function TeamsPage() {
             {/* Teams Grid */}
             <div className="space-y-4 sm:space-y-6">
               {visibleTeams.map((team) => (
-                <TeamCardView
+                <TeamViewer
                   key={team.id}
                   team={team}
                   players={players as any}
@@ -658,9 +664,12 @@ export default function TeamsPage() {
                   onStartRename={() => handleStartRename(team)}
                   onOpenDelete={() => openDeleteDialog(team.id)}
                   deleting={deletingTeamId === team.id}
-                  onOpenPlayerActions={(pid: string) => openPlayerActions(team.id, pid)}
+                  onOpenPlayerActions={(pid: string) =>
+                    openPlayerActions(team.id, pid)
+                  }
                   roleToSlotLabel={roleToSlotLabel}
                   getRoleAvatarGradient={getRoleAvatarGradient}
+                  initialView="list"
                 />
               ))}
             </div>
