@@ -139,82 +139,84 @@ export function HeroCarousel({
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
       >
-        {/* Carousel Images */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentIndex}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-            className="absolute inset-0"
-          >
-            {currentImage.link_url ? (
-              <Link
-                href={currentImage.link_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block w-full h-full"
-              >
-                {currentImage.image_url ? (
-                  <Image
-                    src={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}${currentImage.image_url}`}
-                    alt={currentImage.title || "Carousel image"}
-                    fill
-                    className="object-contain"
-                    priority={currentIndex === 0}
-                    sizes="100vw"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-200 to-primary-100">
-                    <p className="text-primary-700 text-xl font-semibold">
-                      No image available
-                    </p>
-                  </div>
-                )}
-              </Link>
-            ) : (
-              <div className="w-full h-full">
-                {currentImage.image_url ? (
-                  <Image
-                    src={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}${currentImage.image_url}`}
-                    alt={currentImage.title || "Carousel image"}
-                    fill
-                    className="object-contain"
-                    priority={currentIndex === 0}
-                    sizes="100vw"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-200 to-primary-100">
-                    <p className="text-primary-700 text-xl font-semibold">
-                      No image available
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
-          </motion.div>
-        </AnimatePresence>
+        <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-none md:shadow-xl">
+          {/* Carousel Images */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentIndex}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5 }}
+              className="absolute inset-0"
+            >
+              {currentImage.link_url ? (
+                <Link
+                  href={currentImage.link_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block w-full h-full"
+                >
+                  {currentImage.image_url ? (
+                    <Image
+                      src={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}${currentImage.image_url}`}
+                      alt={currentImage.title || "Carousel image"}
+                      fill
+                      className="object-cover md:object-contain"
+                      priority={currentIndex === 0}
+                      sizes="100vw"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-200 to-primary-100">
+                      <p className="text-primary-700 text-xl font-semibold">
+                        No image available
+                      </p>
+                    </div>
+                  )}
+                </Link>
+              ) : (
+                <div className="w-full h-full">
+                  {currentImage.image_url ? (
+                    <Image
+                      src={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}${currentImage.image_url}`}
+                      alt={currentImage.title || "Carousel image"}
+                      fill
+                      className="object-cover md:object-contain"
+                      priority={currentIndex === 0}
+                      sizes="100vw"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-200 to-primary-100">
+                      <p className="text-primary-700 text-xl font-semibold">
+                        No image available
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </motion.div>
+          </AnimatePresence>
 
-        {/* Navigation Arrows */}
-        {showArrows && images.length > 1 && (
-          <>
-            <button
-              onClick={prevSlide}
-              className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-primary-600 hover:bg-primary-700 text-white p-2 sm:p-3 rounded-full shadow-lg transition-all duration-200 z-10"
-              aria-label="Previous slide"
-            >
-              <ChevronLeft className="w-4 h-4 sm:w-6 sm:h-6" />
-            </button>
-            <button
-              onClick={nextSlide}
-              className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-primary-600 hover:bg-primary-700 text-white p-2 sm:p-3 rounded-full shadow-lg transition-all duration-200 z-10"
-              aria-label="Next slide"
-            >
-              <ChevronRight className="w-4 h-4 sm:w-6 sm:h-6" />
-            </button>
-          </>
-        )}
+          {/* Navigation Arrows */}
+          {showArrows && images.length > 1 && (
+            <>
+              <button
+                onClick={prevSlide}
+                className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 text-primary-600 hover:text-primary-700 transition-all duration-200 z-10 rounded-full"
+                aria-label="Previous slide"
+              >
+                <ChevronLeft className="w-8 h-8 sm:w-10 sm:h-10" />
+              </button>
+              <button
+                onClick={nextSlide}
+                className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 text-primary-600 hover:text-primary-700 transition-all duration-200 z-10 rounded-full"
+                aria-label="Next slide"
+              >
+                <ChevronRight className="w-8 h-8 sm:w-10 sm:h-10" />
+              </button>
+            </>
+          )}
+        </div>
 
         {/* Navigation Dots */}
         {images.length > 1 && (

@@ -9,19 +9,21 @@ import { PillNavbar } from "@/components/navigation/PillNavbar";
 import { MobileUserMenu } from "@/components/navigation/MobileUserMenu";
 import { useAuth } from "@/contexts/AuthContext";
 import { Spinner } from "@/components/ui/Loading";
+import { PageContainer, PageSection } from "@/components/ui/PageContainer";
 import {
   publicContestsApi,
   type Contest,
   type EnrollmentResponse,
 } from "@/lib/api/public/contests";
-import { getActiveCarouselImages, type CarouselImage } from "@/lib/api/public/carousel";
+import {
+  getActiveCarouselImages,
+  type CarouselImage,
+} from "@/lib/api/public/carousel";
 import { HeroCarousel } from "@/components/home/HeroCarousel";
-import { ROUTES } from "@/common/consts";
-import { useRouter } from "next/navigation";
+import { ContestCard } from "@/components/home/ContestCard";
 
 export default function HomePage() {
   const { isAuthenticated, isLoading } = useAuth();
-  const router = useRouter();
   const [activeContests, setActiveContests] = useState<Contest[]>([]);
   const [loadingContests, setLoadingContests] = useState(false);
   const [contestsError, setContestsError] = useState<string | null>(null);
@@ -64,7 +66,9 @@ export default function HomePage() {
         // If no carousel images, use sponsor logos as carousel
         if (images.length === 0) {
           try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/v1/sponsors/?active=true&page_size=10`);
+            const response = await fetch(
+              `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/v1/sponsors/?active=true&page_size=10`
+            );
             if (response.ok) {
               const data = await response.json();
               // Convert sponsors to carousel format
@@ -94,23 +98,6 @@ export default function HomePage() {
     };
     loadCarousel();
   }, []);
-
-  // Humanize time remaining until a given ISO date string
-  const formatEndsIn = (isoDate: string): string => {
-    const now = new Date().getTime();
-    const end = new Date(isoDate).getTime();
-    const diffMs = end - now;
-    if (isNaN(end)) return "Ends soon";
-    if (diffMs <= 0) return "Ended";
-
-    const minutes = Math.floor(diffMs / (1000 * 60));
-    const hours = Math.floor(diffMs / (1000 * 60 * 60));
-    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-    if (days >= 1) return `Ends in ${days} day${days === 1 ? "" : "s"}`;
-    if (hours >= 1) return `Ends in ${hours} hour${hours === 1 ? "" : "s"}`;
-    return `Ends in ${Math.max(1, minutes)} min${minutes === 1 ? "" : "s"}`;
-  };
 
   useEffect(() => {
     const loadLive = async () => {
@@ -191,8 +178,8 @@ export default function HomePage() {
           <div className="h-20"></div>
 
           {/* Hero Section - Full Width Carousel */}
-          <section className="relative mx-4 mb-8 sm:mb-10">
-            <div className="relative z-10 container mx-auto px-4 sm:px-6 max-w-screen-xl">
+          <PageSection className="relative mb-8 sm:mb-10">
+            <PageContainer className="relative z-10">
               {loadingCarousel ? (
                 <div className="w-full h-96 md:h-[500px] bg-gradient-to-br from-primary-100 to-primary-50 rounded-3xl flex items-center justify-center">
                   <Spinner size="lg" />
@@ -215,7 +202,8 @@ export default function HomePage() {
                       MWPL Season 2 Fantasy League
                     </h1>
                     <p className="text-lg sm:text-xl text-gray-700 mb-8 max-w-xl mx-auto leading-relaxed">
-                      Build your dream team, compete with friends, and rise to the top!
+                      Build your dream team, compete with friends, and rise to
+                      the top!
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                       {isAuthenticated ? (
@@ -239,12 +227,12 @@ export default function HomePage() {
                   </div>
                 </div>
               )}
-            </div>
-          </section>
+            </PageContainer>
+          </PageSection>
 
           {/* Contests Section - Merged Ongoing and Live */}
-          <section className="mx-4 mb-10 sm:mb-12">
-            <div className="container mx-auto px-4 sm:px-6 max-w-screen-xl">
+          <PageSection fullBleed className="mb-10 sm:mb-12">
+            <PageContainer>
               <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-4">
                 Contests
               </h2>
@@ -270,182 +258,35 @@ export default function HomePage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 auto-rows-fr">
                   {/* Ongoing Contests */}
                   {activeContests.map((c) => (
-                    <div
+                    <ContestCard
                       key={c.id}
-                      role="button"
-                      tabIndex={0}
-                      onClick={() => router.push(`/contests/${c.id}`)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          router.push(`/contests/${c.id}`);
-                        }
-                      }}
-                      className="bg-white/80 backdrop-blur-sm rounded-2xl border border-primary-100 p-5 shadow-sm cursor-pointer hover:shadow md:transition min-h-[160px] h-full"
-                    >
-                      <div className="flex items-start justify-between h-full">
-                        <div className="min-w-0 flex flex-col h-full">
-                          <h3 className="text-lg sm:text-xl font-semibold text-gray-900 break-words whitespace-normal overflow-visible hyphens-auto">
-                            {c.name}
-                          </h3>
-                          {c.description && (
-                            <p className="text-sm text-gray-600 mt-0.5 line-clamp-2">
-                              {c.description}
-                            </p>
-                          )}
-                          <div className="text-xs text-gray-500 mt-1">
-                            {formatEndsIn(c.end_at)}
-                          </div>
-                          <div className="mt-auto pt-3 flex items-center gap-2">
-                            {joinedContestIds.has(c.id) ? (
-                              <Link
-                                href={`/contests/${c.id}/team`}
-                                className="inline-flex justify-center items-center px-4 py-2 rounded-lg border text-sm font-medium text-primary-700 border-primary-200 hover:bg-primary-50"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                View Team
-                              </Link>
-                            ) : (
-                              <Link
-                                href={`/contests/${c.id}/leaderboard`}
-                                className="inline-flex justify-center items-center px-4 py-2 rounded-lg border text-sm font-medium text-gray-700 border-gray-200 hover:bg-gray-50"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                View Leaderboard
-                              </Link>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex flex-col items-end gap-2 shrink-0">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs px-2 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200 inline-flex items-center gap-1">
-                              <span className="h-1.5 w-1.5 rounded-full bg-red-600 animate-pulse"></span>
-                              ONGOING
-                            </span>
-                            {joinedContestIds.has(c.id) && (
-                              <span className="text-xs px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200">
-                                Joined
-                              </span>
-                            )}
-                          </div>
-                          <Image
-                            src="/Contests/logo.png"
-                            alt="Contest logo"
-                            width={120}
-                            height={32}
-                            className="w-[120px] h-auto opacity-90"
-                          />
-                        </div>
-                      </div>
-                    </div>
+                      contest={c}
+                      status="ongoing"
+                      isJoined={joinedContestIds.has(c.id)}
+                      isAuthenticated={isAuthenticated}
+                    />
                   ))}
                   {/* Live Contests */}
                   {liveContests.map((c) => (
-                    <div
+                    <ContestCard
                       key={c.id}
-                      role="button"
-                      tabIndex={0}
-                      onClick={() => router.push(`/contests/${c.id}`)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          router.push(`/contests/${c.id}`);
-                        }
-                      }}
-                      className="bg-white/80 backdrop-blur-sm rounded-2xl border border-primary-100 p-5 shadow-sm cursor-pointer hover:shadow md:transition min-h-[140px] h-full"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="min-w-0">
-                          <h3 className="text-lg sm:text-xl font-semibold text-gray-900 break-words whitespace-normal overflow-visible hyphens-auto">
-                            {c.name}
-                          </h3>
-                          {c.description && (
-                            <p className="text-sm text-gray-600 mt-0.5 line-clamp-2">
-                              {c.description}
-                            </p>
-                          )}
-                          <div className="text-xs text-gray-500 mt-1">
-                            {(() => {
-                              const fmtIST = (iso: string) => {
-                                const d = new Date(iso);
-                                const utc =
-                                  d.getTime() + d.getTimezoneOffset() * 60000;
-                                const ist = new Date(
-                                  utc + (5 * 60 + 30) * 60000
-                                );
-                                return ist.toLocaleString(undefined, {
-                                  year: "numeric",
-                                  month: "short",
-                                  day: "2-digit",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                  hour12: true,
-                                });
-                              };
-                              return `Starts: ${fmtIST(c.start_at)} IST`;
-                            })()}
-                          </div>
-                          <div className="mt-2 flex items-center gap-2">
-                            {!joinedContestIds.has(c.id) ? (
-                              isAuthenticated ? (
-                                <Link
-                                  href={`/contests/${c.id}`}
-                                  className="inline-flex justify-center items-center px-4 py-2 rounded-lg bg-gradient-primary text-white text-sm font-medium shadow hover:opacity-95"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  Join Contest
-                                </Link>
-                              ) : (
-                                <Link
-                                  href={`${ROUTES.LOGIN}?next=${encodeURIComponent(`/contests/${c.id}/team`)}`}
-                                  className="inline-flex justify-center items-center px-4 py-2 rounded-lg bg-gradient-primary text-white text-sm font-medium shadow hover:opacity-95"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  Login to Join Contest
-                                </Link>
-                              )
-                            ) : (
-                              <Link
-                                href={`/contests/${c.id}/leaderboard`}
-                                className="inline-flex justify-center items-center px-4 py-2 rounded-lg border text-sm font-medium text-primary-700 border-primary-200 hover:bg-primary-50"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                View Leaderboard
-                              </Link>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex flex-col items-end gap-2 shrink-0">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200 inline-flex items-center gap-1">
-                              <span className="h-1.5 w-1.5 rounded-full bg-green-600 animate-pulse"></span>
-                              LIVE
-                            </span>
-                            {joinedContestIds.has(c.id) && (
-                              <span className="text-xs px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200">
-                                Joined
-                              </span>
-                            )}
-                          </div>
-                          <Image
-                            src="/Contests/logo.png"
-                            alt="Contest logo"
-                            width={120}
-                            height={32}
-                            className="w-[120px] h-auto opacity-90"
-                          />
-                        </div>
-                      </div>
-                    </div>
+                      contest={c}
+                      status="live"
+                      isJoined={joinedContestIds.has(c.id)}
+                      isAuthenticated={isAuthenticated}
+                    />
                   ))}
                 </div>
               )}
-            </div>
-          </section>
+            </PageContainer>
+          </PageSection>
 
           {/* Features Section */}
-          <section className="py-16 bg-gradient-to-br from-primary-200 via-primary-100 to-primary-300 relative rounded-3xl mx-4 mb-10 sm:mb-12">
-            <div className="container mx-auto px-4 sm:px-6 max-w-screen-xl">
+          <PageSection
+            fullBleed
+            className="py-16 bg-gradient-to-br from-primary-200 via-primary-100 to-primary-300 relative rounded-3xl mb-10 sm:mb-12"
+          >
+            <PageContainer>
               <div className="text-center mb-10 sm:mb-14">
                 <h2 className="text-4xl font-extrabold text-center bg-gradient-primary bg-clip-text text-transparent leading-tight pb-1 mb-8">
                   Why Choose Us?
@@ -472,18 +313,23 @@ export default function HomePage() {
                       <h3 className="text-sm sm:text-lg lg:text-xl font-semibold text-gray-900 mb-1 sm:mb-2">
                         {feature.title}
                       </h3>
-                      <p className="text-xs sm:text-sm lg:text-base text-gray-600">{feature.description}</p>
+                      <p className="text-xs sm:text-sm lg:text-base text-gray-600">
+                        {feature.description}
+                      </p>
                     </div>
                   );
                 })}
               </div>
-            </div>
-          </section>
+            </PageContainer>
+          </PageSection>
 
           {/* CTA Section */}
-          <section className="relative py-20 bg-gradient-primary text-white overflow-hidden rounded-3xl mx-4 mb-8 sm:mb-10">
+          <PageSection
+            fullBleed
+            className="relative py-20 bg-gradient-primary text-white overflow-hidden rounded-3xl mb-8 sm:mb-10"
+          >
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.1),transparent_60%)]" />
-            <div className="container mx-auto px-6 text-center relative z-10 max-w-screen-xl">
+            <PageContainer className="text-center relative z-10">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -514,8 +360,8 @@ export default function HomePage() {
                   </Link>
                 )}
               </motion.div>
-            </div>
-          </section>
+            </PageContainer>
+          </PageSection>
         </>
       )}
     </div>
