@@ -41,6 +41,8 @@ class ContestTeamResponse(BaseModel):
     contest_id: str
     base_points: float
     contest_points: float
+    captain_id: Optional[str] = None
+    vice_captain_id: Optional[str] = None
     players: List[ContestTeamPlayerSchema]
 
 def _compute_status(contest: Contest) -> ContestStatus:
@@ -485,5 +487,7 @@ async def get_team_in_contest(contest_id: str, team_id: str, current_user: Optio
         contest_id=str(contest.id),
         base_points=0.0,
         contest_points=team_points,
+        captain_id=str(team.captain_id) if team.captain_id else None,
+        vice_captain_id=str(team.vice_captain_id) if team.vice_captain_id else None,
         players=player_items,
     )

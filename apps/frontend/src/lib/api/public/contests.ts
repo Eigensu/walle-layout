@@ -70,6 +70,8 @@ export interface ContestTeamResponse {
   contest_id: string;
   base_points: number;
   contest_points: number;
+  captain_id?: string | null;
+  vice_captain_id?: string | null;
   players: ContestTeamPlayer[];
 }
 

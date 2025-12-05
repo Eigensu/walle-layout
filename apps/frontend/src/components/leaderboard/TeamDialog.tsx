@@ -85,14 +85,14 @@ export const TeamDialog: React.FC<TeamDialogProps> = ({
         onClick={onClose}
         aria-hidden="true"
       />
-      <div className="relative mt-6 sm:mt-0 w-full max-w-sm sm:max-w-lg md:max-w-3xl lg:max-w-4xl rounded-lg bg-white shadow-xl border border-primary-200 max-h-[78vh] sm:max-h-[86vh] md:max-h-[88vh] overflow-hidden">
-        <div className="p-2 sm:p-4 overflow-y-auto max-h-[78vh] sm:max-h-[86vh] md:max-h-[88vh]">
-          <div className="flex items-center justify-between mb-2 sm:mb-3">
+      <div className="relative w-full max-w-6xl rounded-lg bg-white shadow-xl border border-primary-200 max-h-[95vh] overflow-hidden flex flex-col">
+        <div className="p-2 sm:p-3 border-b border-gray-200 flex-shrink-0">
+          <div className="flex items-center justify-between">
             <div>
               <h3 className="text-sm sm:text-base font-semibold text-gray-900">
                 {team?.team_name || "Team"}
               </h3>
-              <p className="text-[11px] sm:text-xs text-gray-500">
+              <p className="text-[10px] sm:text-xs text-gray-500">
                 Points:{" "}
                 {typeof team?.contest_points === "number"
                   ? formatPoints(team.contest_points)
@@ -101,11 +101,14 @@ export const TeamDialog: React.FC<TeamDialogProps> = ({
             </div>
             <button
               onClick={onClose}
-              className="px-3 py-1.5 rounded-full text-xs sm:text-sm font-semibold text-white bg-red-600 hover:bg-red-700 shadow"
+              className="px-2.5 py-1 rounded-full text-xs font-semibold text-white bg-red-600 hover:bg-red-700 shadow"
             >
               Close
             </button>
           </div>
+        </div>
+
+        <div className="p-2 sm:p-3 overflow-y-auto flex-1">
 
           {loading && <div className="text-gray-600">Loading team...</div>}
           {error && (
@@ -115,7 +118,7 @@ export const TeamDialog: React.FC<TeamDialogProps> = ({
           )}
 
           {!loading && !error && team && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
               {Object.entries(grouped).map(([slotKey, players], idx) => {
                 const colors = [
                   {
@@ -143,34 +146,52 @@ export const TeamDialog: React.FC<TeamDialogProps> = ({
                 return (
                   <div
                     key={slotKey}
-                    className={`rounded-md border ${tone.border} p-2.5 ${tone.bg}`}
+                    className={`rounded-md border ${tone.border} p-1.5 sm:p-2 ${tone.bg}`}
                   >
                     <div
-                      className={`text-[12px] font-semibold mb-1 ${tone.text}`}
+                      className={`text-[11px] font-semibold mb-1 ${tone.text}`}
                     >
                       Slot {idx + 1}
                     </div>
-                    <div className="space-y-1 leading-tight">
-                      {players.map((p) => (
-                        <div
-                          key={p.id}
-                          className="flex items-center justify-between text-[12px] leading-tight"
-                        >
-                          <div className="min-w-0">
-                            <div className="font-medium text-gray-900 truncate">
-                              {p.name}
-                            </div>
-                            {p.team && (
-                              <div className="text-[11px] text-gray-500 truncate">
-                                {p.team}
+                    <div className="space-y-0.5 leading-tight">
+                      {players.map((p) => {
+                        const isCaptain = team?.captain_id === p.id;
+                        const isViceCaptain = team?.vice_captain_id === p.id;
+                        const fontWeight = isCaptain || isViceCaptain ? "font-extrabold" : "font-medium";
+
+                        return (
+                          <div
+                            key={p.id}
+                            className="text-[11px] leading-tight"
+                          >
+                            <div className="flex items-center justify-between gap-1">
+                              <div className={`${fontWeight} text-gray-900 truncate flex-1`}>
+                                {p.name}
                               </div>
-                            )}
+                              <div className={`text-[10px] ${fontWeight} text-primary-600 flex-shrink-0`}>
+                                {formatPoints(p.contest_points)}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1 mt-0.5">
+                              {p.team && (
+                                <div className="text-[10px] text-gray-500 truncate flex-1">
+                                  {p.team}
+                                </div>
+                              )}
+                              {isCaptain && (
+                                <span className="text-[9px] px-1 py-0.5 rounded bg-primary-100 text-primary-700 border border-primary-400 font-bold flex-shrink-0">
+                                  2X C
+                                </span>
+                              )}
+                              {isViceCaptain && (
+                                <span className="text-[9px] px-1 py-0.5 rounded bg-primary-100 text-primary-700 border border-primary-400 font-bold flex-shrink-0">
+                                  1.5X VC
+                                </span>
+                              )}
+                            </div>
                           </div>
-                          <div className="text-[11px] font-semibold text-primary-600 ml-2 flex-shrink-0">
-                            {formatPoints(p.contest_points)}
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 );

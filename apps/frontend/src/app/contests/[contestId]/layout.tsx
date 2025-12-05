@@ -63,8 +63,8 @@ export default function ContestLayout({
 
       <div className="px-3 sm:px-4 py-4 sm:py-8">
         <div className="max-w-6xl mx-auto">
-          {/* Header - hidden on hub index and on leaderboard page */}
-          {!isHubIndex && !isLeaderboardRoute && (
+          {/* Header - hidden on hub index, leaderboard page, and team page */}
+          {!isHubIndex && !isLeaderboardRoute && !pathname?.endsWith('/team') && (
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow p-4 sm:p-6 border border-gray-200">
               {loading ? (
                 <div className="text-gray-500">Loading contest...</div>
