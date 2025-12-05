@@ -149,24 +149,22 @@ export default function HomePage() {
       {
         icon: Trophy,
         title: "Compete & Win",
-        description:
-          "Build your dream cricket team and compete in fantasy leagues",
+        description: "Build your team and compete",
       },
       {
         icon: Users,
         title: "Team Builder",
-        description:
-          "Strategic player selection with real-time stats and insights",
+        description: "Strategic picks with live stats",
       },
       {
         icon: TrendingUp,
         title: "Live Leaderboards",
-        description: "Track your ranking and compete with players worldwide",
+        description: "Track rankings worldwide",
       },
       {
         icon: Shield,
         title: "Secure Platform",
-        description: "Safe and fair gameplay with advanced analytics",
+        description: "Safe and fair gameplay",
       },
     ],
     []
@@ -244,18 +242,18 @@ export default function HomePage() {
             </div>
           </section>
 
-          {/* Ongoing Contests */}
+          {/* Contests Section - Merged Ongoing and Live */}
           <section className="mx-4 mb-10 sm:mb-12">
             <div className="container mx-auto px-4 sm:px-6 max-w-screen-xl">
               <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-4">
-                Ongoing Contests
+                Contests
               </h2>
               {contestsError && (
                 <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm mb-4">
                   {contestsError}
                 </div>
               )}
-              {loadingContests ? (
+              {loadingContests || loadingLive ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 auto-rows-fr">
                   {Array.from({ length: 4 }).map((_, i) => (
                     <div
@@ -264,12 +262,13 @@ export default function HomePage() {
                     />
                   ))}
                 </div>
-              ) : activeContests.length === 0 ? (
+              ) : activeContests.length === 0 && liveContests.length === 0 ? (
                 <div className="bg-white border border-gray-200 rounded-2xl p-6 text-gray-600">
-                  No active contests right now. Check back soon!
+                  No contests available right now. Check back soon!
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 auto-rows-fr">
+                  {/* Ongoing Contests */}
                   {activeContests.map((c) => (
                     <div
                       key={c.id}
@@ -340,32 +339,7 @@ export default function HomePage() {
                       </div>
                     </div>
                   ))}
-                </div>
-              )}
-            </div>
-          </section>
-
-          {/* Live Contests */}
-          <section className="mx-4 mb-10 sm:mb-12">
-            <div className="container mx-auto px-4 sm:px-6 max-w-screen-xl">
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-4">
-                Live Contests
-              </h2>
-              {loadingLive ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {Array.from({ length: 4 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="h-40 bg-white rounded-2xl shadow animate-pulse"
-                    />
-                  ))}
-                </div>
-              ) : liveContests.length === 0 ? (
-                <div className="bg-white border border-gray-200 rounded-2xl p-6 text-gray-600">
-                  No live contests at the moment.
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 auto-rows-fr">
+                  {/* Live Contests */}
                   {liveContests.map((c) => (
                     <div
                       key={c.id}
@@ -443,7 +417,8 @@ export default function HomePage() {
                         </div>
                         <div className="flex flex-col items-end gap-2 shrink-0">
                           <div className="flex items-center gap-2">
-                            <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 border border-gray-200">
+                            <span className="text-xs px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200 inline-flex items-center gap-1">
+                              <span className="h-1.5 w-1.5 rounded-full bg-green-600 animate-pulse"></span>
                               LIVE
                             </span>
                             {joinedContestIds.has(c.id) && (
@@ -472,7 +447,7 @@ export default function HomePage() {
           <section className="py-16 bg-gradient-to-br from-primary-200 via-primary-100 to-primary-300 relative rounded-3xl mx-4 mb-10 sm:mb-12">
             <div className="container mx-auto px-4 sm:px-6 max-w-screen-xl">
               <div className="text-center mb-10 sm:mb-14">
-                <h2 className="text-5xl font-extrabold text-center bg-gradient-primary bg-clip-text text-transparent leading-tight pb-1 mb-8">
+                <h2 className="text-4xl font-extrabold text-center bg-gradient-primary bg-clip-text text-transparent leading-tight pb-1 mb-8">
                   Why Choose Us?
                 </h2>
                 <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -481,7 +456,7 @@ export default function HomePage() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 lg:gap-8">
                 {features.map((feature, index) => {
                   const Icon = feature.icon as React.ComponentType<{
                     className?: string;
@@ -489,15 +464,15 @@ export default function HomePage() {
                   return (
                     <div
                       key={feature.title}
-                      className="relative bg-white/70 backdrop-blur-lg border border-primary-100 rounded-2xl p-8 shadow-md"
+                      className="relative bg-white/70 backdrop-blur-lg border border-primary-100 rounded-2xl p-4 sm:p-6 lg:p-8 shadow-md"
                     >
-                      <div className="w-14 h-14 rounded-xl bg-gradient-primary flex items-center justify-center mb-4 shadow-inner">
-                        <Icon className="w-7 h-7 text-white" />
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-xl bg-gradient-primary flex items-center justify-center mb-2 sm:mb-3 lg:mb-4 shadow-inner">
+                        <Icon className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-white" />
                       </div>
-                      <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                      <h3 className="text-sm sm:text-lg lg:text-xl font-semibold text-gray-900 mb-1 sm:mb-2">
                         {feature.title}
                       </h3>
-                      <p className="text-gray-600">{feature.description}</p>
+                      <p className="text-xs sm:text-sm lg:text-base text-gray-600">{feature.description}</p>
                     </div>
                   );
                 })}
@@ -524,10 +499,10 @@ export default function HomePage() {
                 </p>
                 {isAuthenticated ? (
                   <Link
-                    href="/dashboard"
+                    href="/contests"
                     className="inline-flex items-center bg-white text-primary-600 font-semibold px-8 py-3 rounded-full text-lg shadow-lg hover:shadow-[0_0_25px_rgba(255,255,255,0.4)] transition-all duration-300 animate-pulse-slow"
                   >
-                    Visit Your Dashboard
+                    Explore Contests
                     <ArrowRight className="ml-2" />
                   </Link>
                 ) : (
