@@ -140,8 +140,8 @@ export default function ContestTeamBuilderPage() {
         if (!mounted) return;
         const e = Array.isArray(mine)
           ? mine.find(
-            (x) => x.contest_id === contestId && x.status === "active"
-          )
+              (x) => x.contest_id === contestId && x.status === "active"
+            )
           : undefined;
         setEnrollment(e || null);
         const token = localStorage.getItem(LS_KEYS.ACCESS_TOKEN);
@@ -274,8 +274,8 @@ export default function ContestTeamBuilderPage() {
           } catch (e: any) {
             showAlert(
               e?.response?.data?.detail ||
-              e?.message ||
-              "Failed to enroll in contest",
+                e?.message ||
+                "Failed to enroll in contest",
               "Enrollment failed"
             );
           }
@@ -357,7 +357,7 @@ export default function ContestTeamBuilderPage() {
                       setShowNameDialog(false);
                     }
                   }}
-                  className="px-5 py-2.5 rounded-full text-sm font-semibold text-white bg-gradient-primary shadow hover:shadow-[0_0_20px_rgba(191,171,121,0.35)]"
+                  className="px-5 py-2.5 rounded-full text-sm font-semibold text-white bg-gradient-brand shadow hover:shadow-pink-soft"
                 >
                   Continue
                 </button>
@@ -400,7 +400,9 @@ export default function ContestTeamBuilderPage() {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-[10px] text-gray-500 italic">No players selected yet</p>
+                    <p className="text-[10px] text-gray-500 italic">
+                      No players selected yet
+                    </p>
                   )}
                 </div>
               </div>
@@ -431,7 +433,9 @@ export default function ContestTeamBuilderPage() {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-xs md:text-sm text-gray-500 italic">No players selected yet</p>
+                    <p className="text-xs md:text-sm text-gray-500 italic">
+                      No players selected yet
+                    </p>
                   )}
                 </div>
               </div>
@@ -445,10 +449,16 @@ export default function ContestTeamBuilderPage() {
           {/* Removed TeamSummary - now showing builder directly */}
           {showViewOnly ? (
             <div className="text-center py-12">
-              <p className="text-gray-600 mb-4">You have already created a team for this contest.</p>
+              <p className="text-gray-600 mb-4">
+                You have already created a team for this contest.
+              </p>
               <Button
                 variant="primary"
-                onClick={() => router.push(`/teams?contest_id=${encodeURIComponent(String(contestId || ""))}`)}
+                onClick={() =>
+                  router.push(
+                    `/teams?contest_id=${encodeURIComponent(String(contestId || ""))}`
+                  )
+                }
               >
                 View Your Team
               </Button>
@@ -535,7 +545,6 @@ export default function ContestTeamBuilderPage() {
                         {TOTAL_MAX || 12}
                       </h4>
                     </div>
-
                     <div className="mb-2 rounded-lg border border-amber-200 bg-amber-50 text-amber-700 px-2.5 sm:px-3 py-2 sm:py-2.5 text-xs sm:text-sm">
                       {(() => {
                         const mins = Array.from(
@@ -547,8 +556,8 @@ export default function ContestTeamBuilderPage() {
                         return `Meet the minimum required players in each Slot and press Next to proceed.`;
                       })()}
                     </div>
-
-                    {/* Player list - now full width */}                   <div>
+                    {/* Player list - now full width */}{" "}
+                    <div>
                       <div className="flex overflow-x-auto gap-2 mb-3 sm:mb-4 pb-2 -mx-2 px-2 scrollbar-hide">
                         {slots.map((s) => {
                           const limit = SLOT_LIMITS[s.id];
@@ -622,7 +631,7 @@ export default function ContestTeamBuilderPage() {
                       )}
 
                       {slots.findIndex((s) => s.id === activeSlotId) ===
-                        slots.length - 1 ? (
+                      slots.length - 1 ? (
                         <div className="flex items-center justify-center mt-6">
                           <div className="flex gap-3 w-full sm:w-auto">
                             <Button
@@ -725,7 +734,7 @@ export default function ContestTeamBuilderPage() {
                                     isSelected={true}
                                     isCaptain={player.id === captainId}
                                     isViceCaptain={player.id === viceCaptainId}
-                                    onSelect={() => { }}
+                                    onSelect={() => {}}
                                     onSetCaptain={handleSetCaptain}
                                     onSetViceCaptain={handleSetViceCaptain}
                                     onReplace={openReplace}
@@ -754,7 +763,6 @@ export default function ContestTeamBuilderPage() {
                       </div>
                     )}
                   </div>
-
                 ) : (
                   <div className="text-center py-8 text-gray-400 text-sm">
                     Continue from Step 1 to configure Captain & Vice-Captain
@@ -963,6 +971,6 @@ export default function ContestTeamBuilderPage() {
           )}
         </div>
       </main>
-    </div >
+    </div>
   );
 }

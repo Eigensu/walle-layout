@@ -123,7 +123,7 @@ export function TeamViewer({
   };
 
   return (
-    <Card className="p-4 sm:p-6 border-2 border-gray-200 hover:border-primary-300 transition-all hover:shadow-lg">
+    <Card className="p-4 sm:p-6 border-2 border-border-subtle hover:border-accent-pink-500/30 transition-all">
       {/* Header Section */}
       <div className="flex flex-col gap-2 mb-4">
         <div className="flex items-start justify-between gap-3">

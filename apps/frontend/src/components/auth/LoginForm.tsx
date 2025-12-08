@@ -84,7 +84,7 @@ export function LoginForm() {
       </div>
 
       {/* Login Form */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-[0_35px_140px_-10px_rgba(191,171,121,0.5)]">
+      <div className="bg-bg-card rounded-3xl p-6 sm:p-8 shadow-pink-soft">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">

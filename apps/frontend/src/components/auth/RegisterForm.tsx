@@ -26,8 +26,14 @@ const registerSchema = z
     mobile: z
       .string({ required_error: "Mobile number is required" })
       .trim()
-      .refine((v) => !/[+]/.test(v), "Do not include country code (e.g., +91). Enter 10-digit mobile number")
-      .refine((v) => !/^00/.test(v.trim()), "Do not include country code (e.g., 0091). Enter 10-digit mobile number")
+      .refine(
+        (v) => !/[+]/.test(v),
+        "Do not include country code (e.g., +91). Enter 10-digit mobile number"
+      )
+      .refine(
+        (v) => !/^00/.test(v.trim()),
+        "Do not include country code (e.g., 0091). Enter 10-digit mobile number"
+      )
       .refine((v) => {
         const digits = v.replace(/\D/g, "");
         return /^\d{10}$/.test(digits);
@@ -103,7 +109,7 @@ export function RegisterForm() {
       </div>
 
       {/* Register Form */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-[0_35px_140px_-10px_rgba(191,171,121,0.5)]">
+      <div className="bg-bg-card rounded-3xl p-6 sm:p-8 shadow-pink-soft">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
