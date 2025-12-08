@@ -694,46 +694,49 @@ export default function ContestTeamBuilderPage() {
                   <div className="space-y-4">
                     {selectedPlayers.length > 0 ? (
                       <>
-                        {/* Mobile: Compact Cards */}
-                        <div className="md:hidden space-y-2">
-                          {players
-                            .filter((player) =>
-                              selectedPlayers.includes(player.id)
-                            )
-                            .map((player: Player) => (
-                              <CaptainSelectionCard
-                                key={player.id}
-                                player={player}
-                                isCaptain={player.id === captainId}
-                                isViceCaptain={player.id === viceCaptainId}
-                                onSetCaptain={handleSetCaptain}
-                                onSetViceCaptain={handleSetViceCaptain}
-                              />
-                            ))}
-                        </div>
+                        {(() => {
+                          // Extract filtered players to avoid duplication
+                          const selectedPlayersList = players.filter((player) =>
+                            selectedPlayers.includes(player.id)
+                          );
 
-                        {/* Desktop/Tablet: Regular Cards */}
-                        <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                          {players
-                            .filter((player) =>
-                              selectedPlayers.includes(player.id)
-                            )
-                            .map((player: Player) => (
-                              <PlayerCard
-                                key={player.id}
-                                player={player}
-                                isSelected={true}
-                                isCaptain={player.id === captainId}
-                                isViceCaptain={player.id === viceCaptainId}
-                                onSelect={() => { }}
-                                onSetCaptain={handleSetCaptain}
-                                onSetViceCaptain={handleSetViceCaptain}
-                                onReplace={openReplace}
-                                showActions={true}
-                                variant="captain"
-                              />
-                            ))}
-                        </div>
+                          return (
+                            <>
+                              {/* Mobile: Compact Cards */}
+                              <div className="md:hidden space-y-2">
+                                {selectedPlayersList.map((player: Player) => (
+                                  <CaptainSelectionCard
+                                    key={player.id}
+                                    player={player}
+                                    isCaptain={player.id === captainId}
+                                    isViceCaptain={player.id === viceCaptainId}
+                                    onSetCaptain={handleSetCaptain}
+                                    onSetViceCaptain={handleSetViceCaptain}
+                                  />
+                                ))}
+                              </div>
+
+                              {/* Desktop/Tablet: Regular Cards */}
+                              <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {selectedPlayersList.map((player: Player) => (
+                                  <PlayerCard
+                                    key={player.id}
+                                    player={player}
+                                    isSelected={true}
+                                    isCaptain={player.id === captainId}
+                                    isViceCaptain={player.id === viceCaptainId}
+                                    onSelect={() => { }}
+                                    onSetCaptain={handleSetCaptain}
+                                    onSetViceCaptain={handleSetViceCaptain}
+                                    onReplace={openReplace}
+                                    showActions={true}
+                                    variant="captain"
+                                  />
+                                ))}
+                              </div>
+                            </>
+                          );
+                        })()}
 
                         <div className="flex justify-center mt-6">
                           <Button

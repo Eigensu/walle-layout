@@ -43,15 +43,17 @@ export const CaptainSelectionCard: React.FC<CaptainSelectionCardProps> = ({
         <button
           onClick={(e) => {
             e.stopPropagation();
-            onSetCaptain(player.id);
+            if (!isCaptain) {
+              onSetCaptain(player.id);
+            }
           }}
           disabled={isCaptain}
+          aria-label={isCaptain ? "Captain selected" : "Set as captain"}
           className={`
             px-2.5 py-1 text-[10px] font-medium rounded-md transition-all
-            ${
-              isCaptain
-                ? "bg-warning-500 text-white border border-warning-600 shadow-sm"
-                : "bg-warning-50 text-warning-700 border border-warning-200 hover:bg-warning-100"
+            ${isCaptain
+              ? "bg-warning-500 text-white border border-warning-600 shadow-sm cursor-default"
+              : "bg-warning-50 text-warning-700 border border-warning-200 hover:bg-warning-100"
             }
           `}
         >
@@ -60,15 +62,17 @@ export const CaptainSelectionCard: React.FC<CaptainSelectionCardProps> = ({
         <button
           onClick={(e) => {
             e.stopPropagation();
-            onSetViceCaptain(player.id);
+            if (!isViceCaptain) {
+              onSetViceCaptain(player.id);
+            }
           }}
           disabled={isViceCaptain}
+          aria-label={isViceCaptain ? "Vice Captain selected" : "Set as vice captain"}
           className={`
             px-2.5 py-1 text-[10px] font-medium rounded-md transition-all
-            ${
-              isViceCaptain
-                ? "bg-secondary-500 text-white border border-secondary-600 shadow-sm"
-                : "bg-secondary-50 text-secondary-700 border border-secondary-200 hover:bg-secondary-100"
+            ${isViceCaptain
+              ? "bg-secondary-500 text-white border border-secondary-600 shadow-sm cursor-default"
+              : "bg-secondary-50 text-secondary-700 border border-secondary-200 hover:bg-secondary-100"
             }
           `}
         >
