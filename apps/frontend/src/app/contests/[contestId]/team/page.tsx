@@ -12,6 +12,7 @@ import {
   Badge,
   Card,
   Avatar,
+  CaptainSelectionCard,
 } from "@/components";
 import type { Player } from "@/components";
 import { useAuth } from "@/contexts/AuthContext";
@@ -693,7 +694,26 @@ export default function ContestTeamBuilderPage() {
                   <div className="space-y-4">
                     {selectedPlayers.length > 0 ? (
                       <>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {/* Mobile: Compact Cards */}
+                        <div className="md:hidden space-y-2">
+                          {players
+                            .filter((player) =>
+                              selectedPlayers.includes(player.id)
+                            )
+                            .map((player: Player) => (
+                              <CaptainSelectionCard
+                                key={player.id}
+                                player={player}
+                                isCaptain={player.id === captainId}
+                                isViceCaptain={player.id === viceCaptainId}
+                                onSetCaptain={handleSetCaptain}
+                                onSetViceCaptain={handleSetViceCaptain}
+                              />
+                            ))}
+                        </div>
+
+                        {/* Desktop/Tablet: Regular Cards */}
+                        <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                           {players
                             .filter((player) =>
                               selectedPlayers.includes(player.id)
@@ -731,6 +751,7 @@ export default function ContestTeamBuilderPage() {
                       </div>
                     )}
                   </div>
+
                 ) : (
                   <div className="text-center py-8 text-gray-400 text-sm">
                     Continue from Step 1 to configure Captain & Vice-Captain
