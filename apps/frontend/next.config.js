@@ -39,6 +39,12 @@ const nextConfig = {
         port: "",
         pathname: "/api/**",
       },
+      {
+        protocol: "https",
+        hostname: "mscsuper.blr1.digitaloceanspaces.com",
+        port: "",
+        pathname: "/**",
+      },
     ],
   },
   async rewrites() {
