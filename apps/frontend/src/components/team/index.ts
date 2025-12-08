@@ -1,5 +1,5 @@
 // Team Components
-export { PlayerCard, PlayerList, SearchInput, Pagination } from './PlayerCard/index'
+export { PlayerCard, PlayerList, SearchInput, Pagination, CaptainSelectionCard } from './PlayerCard/index'
 
 // Types
 export type { Player, PlayerCardProps, PlayerListProps } from './PlayerCard/index'
