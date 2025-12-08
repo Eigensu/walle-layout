@@ -35,7 +35,7 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "walle-layout-production.up.railway.app",
+        hostname: "api-wallearena.com",
         port: "",
         pathname: "/api/**",
       },
