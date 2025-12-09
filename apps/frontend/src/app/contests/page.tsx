@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Trophy, Star } from "lucide-react";
 import EmptyState from "@/components/ui/EmptyState";
 import { useRouter } from "next/navigation";
+import LogoLoop from "@/components/ui/LogoLoop";
 import {
   publicContestsApi,
   Contest,
@@ -70,14 +71,14 @@ export default function ContestsPage() {
     );
 
   return (
-    <div className="min-h-screen bg-bg-body">
+    <div className="min-h-screen bg-bg-body flex flex-col">
       <PillNavbar
         activeId="contests"
         mobileMenuContent={isAuthenticated ? <MobileUserMenu /> : undefined}
       />
       <div className="h-24" />
 
-      <div className="max-w-4xl mx-auto px-3 sm:px-4 pt-1 sm:pt-0">
+      <div className="max-w-4xl mx-auto px-3 sm:px-4 pt-1 sm:pt-0 flex-1 w-full">
         <h1 className="flex items-center justify-center gap-2 sm:gap-3 text-2xl sm:text-3xl font-extrabold mb-6 sm:mb-8 text-center text-text-main">
           <Trophy className="w-7 h-7 text-accent-pink-500" />
           <span>Contests</span>
@@ -120,6 +121,25 @@ export default function ContestsPage() {
               />
             )}
         </div>
+      </div>
+
+      {/* LogoLoop at the bottom */}
+      <div className="mt-12 pb-10">
+        <LogoLoop
+          logos={[
+            { src: "/logos/company1.png", alt: "Company 1" },
+            { src: "/logos/c2.png", alt: "Company 2" },
+            { src: "/logos/c3.png", alt: "Company 3" },
+          ]}
+          speed={120}
+          direction="left"
+          logoHeight={48}
+          gap={40}
+          hoverSpeed={0}
+          scaleOnHover
+          ariaLabel="Our Partners"
+          className="[&_img]:brightness-0 [&_img]:invert [&_img]:opacity-90"
+        />
       </div>
     </div>
   );
