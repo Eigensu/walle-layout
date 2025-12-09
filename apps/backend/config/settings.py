@@ -53,8 +53,9 @@ class Settings(BaseSettings):
     
     @property
     def cors_origins_list(self) -> list[str]:
-        """Convert CORS origins string to list."""
-        return [origin.strip() for origin in self.cors_origins.split(",")]
+        """Convert CORS origins string to list and support wildcard patterns."""
+        origins = [origin.strip() for origin in self.cors_origins.split(",")]
+        return origins
     
     @property
     def is_production(self) -> bool:

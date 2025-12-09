@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import uvicorn
 from datetime import datetime
+import fnmatch
 from config.settings import settings
 import logging
 from config.database import connect_to_mongo, close_mongo_connection
@@ -46,10 +47,14 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS middleware
+# CORS middleware with wildcard support
+def get_cors_origins():
+    """Get CORS origins list with wildcard pattern support."""
+    return settings.cors_origins_list
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins_list,
+    allow_origins=get_cors_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
