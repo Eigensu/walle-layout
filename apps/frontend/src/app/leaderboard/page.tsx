@@ -71,7 +71,7 @@ export default function LeaderboardIndexPage() {
               onClick={() =>
                 router.push(`/contests/${pinnedFull.id}/leaderboard`)
               }
-              className="w-full text-left rounded-2xl bg-gradient-brand px-5 py-4 shadow-pink-soft hover:shadow-pink-strong transition flex items-center justify-between"
+              className="w-full text-left rounded-2xl bg-gradient-brand px-5 py-4 shadow-pink-soft hover:shadow-pink-strong transition flex items-center justify-between border-2 border-accent-pink-soft"
             >
               <div className="min-w-0 pr-3">
                 <div className="flex items-center gap-2">
@@ -108,7 +108,7 @@ export default function LeaderboardIndexPage() {
             <button
               key={c.id}
               onClick={() => router.push(`/contests/${c.id}/leaderboard`)}
-              className="w-full text-left rounded-2xl bg-gradient-brand px-5 py-4 shadow-pink-soft hover:shadow-pink-strong transition flex items-center justify-between"
+              className="w-full text-left rounded-2xl bg-gradient-brand px-5 py-4 shadow-pink-soft hover:shadow-pink-strong transition flex items-center justify-between border-2 border-accent-pink-soft"
             >
               <div className="min-w-0 pr-3">
                 <div className="flex items-center gap-2">

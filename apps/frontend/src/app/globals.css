@@ -8,97 +8,85 @@
   --font-heading: var(--font-poppins), var(--font-inter), system-ui, sans-serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
 
-  /* Base blues */
-  --bg-body: #050816;
-  --bg-elevated: #090f2a;
-  --bg-card: #111735;
-  --bg-card-soft: #171e40;
-  --bg-chip: #222959;
+  /* Base purples */
+  --bg-body: #1a073e;
+  --bg-elevated: #26104e;
+  --bg-card: #3c1f62;
+  --bg-card-soft: #4a325f;
+  --bg-chip: #70537f;
 
-  /* Accents - pink */
-  --accent-pink: #ca3985;
-  --accent-pink-soft: #e462a1;
-  --accent-pink-deep: #8a1f57;
-  --accent-pink-faint: #f6c0da;
+  /* Accents - light lavenders ("pink") */
+  --accent-pink: #c8badf;
+  --accent-pink-soft: #d9cbe8;
+  --accent-pink-deep: #9887b0;
+  --accent-pink-faint: #eee7f8;
 
-  /* Accents - orange */
-  --accent-orange: #d26c32;
-  --accent-orange-soft: #f59b4c;
-  --accent-orange-deep: #8e3e19;
-  --accent-orange-faint: #ffd1a1;
+  /* Accents - deeper purples ("orange") */
+  --accent-orange: #8f82a0;
+  --accent-orange-soft: #83709a;
+  --accent-orange-deep: #4b405a;
+  --accent-orange-faint: #b6a7d3;
 
   /* Text & neutrals */
-  --text-main: #ffffff;
-  --text-muted: #c4cae8;
-  --text-subtle: #8a8fb5;
-  --border-subtle: #252b4a;
-  --border-strong: #3b4270;
+  --text-main: #f7f3ff;
+  --text-muted: #c0b6e1;
+  --text-subtle: #9887b0;
+  --border-subtle: #4a4061;
+  --border-strong: #6f6490;
 
   /* Status */
   --success: #23d18b;
   --warning: #facc15;
   --danger: #ff4b6e;
 
-  /* Gradients - Metallic Look with Shine */
+  /* Gradients */
   --gradient-hero: linear-gradient(
     120deg,
-    #050816 0%,
-    #101a3e 35%,
-    #1a2558 70%,
-    #22346f 100%
+    #1a073e 0%,
+    #29114e 40%,
+    #3c1f62 75%,
+    #4a325f 100%
   );
 
   --gradient-brand: linear-gradient(
-    135deg,
-    #e85a9a 0%,
-    #ff6fa8 12%,
-    #ff9dc9 25%,
-    #ffa885 38%,
-    #ffb347 50%,
-    #ffa05a 62%,
-    #ff8c42 75%,
-    #f59b4c 88%,
-    #e67e32 100%
+    to right,
+    #816e99 0%,
+    #8878a1 50%,
+    #391c60 100%
   );
 
   --gradient-card: linear-gradient(
     145deg,
-    #151a3a 0%,
-    #101634 45%,
-    #171f43 100%
+    #816e99 0%,
+    #8878a1 50%,
+    #391c60 100%
   );
 
   --gradient-button-primary: linear-gradient(
     135deg,
-    #e85a9a 0%,
-    #ff6fa8 12%,
-    #ff9dc9 25%,
-    #ffa885 38%,
-    #ffb347 50%,
-    #ffa05a 62%,
-    #ff8c42 75%,
-    #f59b4c 88%,
-    #e67e32 100%
+    #816e99 0%,
+    #8878a1 50%,
+    #391c60 100%
   );
 
   --gradient-button-secondary: linear-gradient(
     135deg,
-    #101a3e 0%,
-    #22346f 55%,
-    #ca3985 100%
+    #5f4e9b 0%,
+    #6456a0 50%,
+    #391c60 100%
   );
 
-  /* Shadows tuned for neon look */
-  --shadow-soft-pink: 0 0 18px rgba(202, 57, 133, 0.35);
-  --shadow-strong-pink: 0 0 30px rgba(202, 57, 133, 0.55);
+  /* Shadows */
+  --shadow-soft-pink: 0 0 18px rgba(200, 186, 223, 0.35);
+  --shadow-strong-pink: 0 0 30px rgba(152, 135, 176, 0.55);
 
   /* Legacy gradient support */
   --primary-gradient: var(--gradient-brand);
   --secondary-gradient: var(--gradient-button-secondary);
   --glass-bg: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.1) 0%,
-    rgba(255, 255, 255, 0.05) 100%
+    rgba(200, 186, 223, 0.1) 0%,
+    rgba(152, 135, 176, 0.05) 100%
   );
 
   /* Animation Variables */
@@ -229,11 +217,11 @@ body {
   @keyframes pulse-glow {
     0%,
     100% {
-      box-shadow: 0 0 20px rgba(202, 57, 133, 0.3);
+      box-shadow: 0 0 20px rgba(200, 186, 223, 0.3);
     }
 
     50% {
-      box-shadow: 0 0 40px rgba(202, 57, 133, 0.6);
+      box-shadow: 0 0 40px rgba(200, 186, 223, 0.6);
     }
   }
 }

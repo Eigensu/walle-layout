@@ -98,7 +98,7 @@ export function ContestCard({
       return (
         <Link
           href={`/contests/${contest.id}/leaderboard`}
-          className="inline-flex justify-center items-center px-4 py-2 rounded-lg bg-[#0a1428] text-white text-sm font-medium border border-[#1a2a4a] hover:bg-[#0f1c35] shadow-md"
+          className="inline-flex justify-center items-center px-4 py-2 rounded-lg bg-gradient-button-secondary text-white text-sm font-medium shadow-md hover:opacity-90 transition-opacity"
           onClick={(e) => e.stopPropagation()}
         >
           View Leaderboard
@@ -112,7 +112,7 @@ export function ContestCard({
         return (
           <Link
             href={`/contests/${contest.id}`}
-            className="inline-flex justify-center items-center px-4 py-2 rounded-lg bg-gradient-brand text-white text-sm font-medium shadow-pink-soft hover:shadow-pink-strong"
+            className="inline-flex justify-center items-center px-4 py-2 rounded-lg bg-gradient-button-primary text-white text-sm font-medium shadow-pink-soft hover:shadow-pink-strong transition-shadow"
             onClick={(e) => e.stopPropagation()}
           >
             Join Contest
@@ -122,7 +122,7 @@ export function ContestCard({
       return (
         <Link
           href={`${ROUTES.LOGIN}?next=${encodeURIComponent(`/contests/${contest.id}/team`)}`}
-          className="inline-flex justify-center items-center px-4 py-2 rounded-lg bg-gradient-brand text-white text-sm font-medium shadow-pink-soft hover:shadow-pink-strong"
+          className="inline-flex justify-center items-center px-4 py-2 rounded-lg bg-gradient-button-primary text-white text-sm font-medium shadow-pink-soft hover:shadow-pink-strong transition-shadow"
           onClick={(e) => e.stopPropagation()}
         >
           Login to Join Contest
@@ -133,7 +133,7 @@ export function ContestCard({
     return (
       <Link
         href={`/contests/${contest.id}/leaderboard`}
-        className="inline-flex justify-center items-center px-4 py-2 rounded-lg bg-[#0a1428] text-white text-sm font-medium border border-[#1a2a4a] hover:bg-[#0f1c35] shadow-md"
+        className="inline-flex justify-center items-center px-4 py-2 rounded-lg bg-gradient-button-secondary text-white text-sm font-medium shadow-md hover:opacity-90 transition-opacity"
         onClick={(e) => e.stopPropagation()}
       >
         View Leaderboard
