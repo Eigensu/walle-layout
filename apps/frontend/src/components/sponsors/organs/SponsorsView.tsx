@@ -34,7 +34,7 @@ export function SponsorsView(props: SponsorsViewProps) {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative py-20 overflow-hidden">
+      <section className="relative py-8 md:py-20 overflow-hidden">
         <div className="container mx-auto px-6 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -42,14 +42,14 @@ export function SponsorsView(props: SponsorsViewProps) {
             transition={{ duration: 0.6 }}
             className="text-center max-w-4xl mx-auto"
           >
-            <div className="inline-flex items-center gap-2 bg-bg-elevated text-accent-pink-500 px-4 py-2 rounded-full text-sm font-medium mb-6 border border-border-subtle">
+            <div className="inline-flex items-center gap-2 bg-bg-elevated text-accent-pink-500 px-4 py-2 rounded-full text-xs md:text-sm font-medium mb-4 border border-border-subtle">
               <Sparkles className="w-4 h-4" />
               Our Partners
             </div>
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-brand bg-clip-text text-transparent">
+            <h1 className="text-3xl md:text-6xl font-bold mb-4 bg-gradient-brand bg-clip-text text-transparent">
               Meet Our Sponsors
             </h1>
-            <p className="text-xl text-text-muted mb-8 max-w-2xl mx-auto">
+            <p className="text-base md:text-xl text-text-muted mb-4 max-w-2xl mx-auto">
               We&apos;re proud to partner with leading brands that share our
               vision of creating the ultimate fantasy cricket experience.
             </p>
@@ -59,7 +59,7 @@ export function SponsorsView(props: SponsorsViewProps) {
 
       {/* Featured Sponsors */}
       {featuredSponsors.length > 0 && !loading && (
-        <section className="py-12">
+        <section className="py-4 md:py-12">
           <div className="container mx-auto px-6">
             <motion.div
               initial={{ opacity: 0, y: 20 }}

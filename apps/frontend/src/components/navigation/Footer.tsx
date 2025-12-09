@@ -1,24 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import { Trophy, Mail, MapPin, Phone } from "lucide-react";
+import { Mail, MapPin, Phone } from "lucide-react";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
     <footer className="bg-bg-elevated border-t border-border-subtle mt-auto">
-      <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="w-full px-4 sm:px-6 py-8 sm:py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {/* Brand Section */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <Trophy className="w-6 h-6 text-accent-pink-500" />
-              <span className="text-xl font-bold text-text-main">MWPL</span>
+              <span className="text-xl font-bold text-text-main">
+                Walle Arena
+              </span>
             </div>
             <p className="text-sm text-text-muted">
-              Mumbai&apos;s premier fantasy cricket platform. Join thousands of
-              players competing in exciting contests.
+              Premier fantasy league platform. Join thousands of players
+              competing in exciting contests.
             </p>
           </div>
 
@@ -71,47 +72,6 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Support */}
-          <div>
-            <h3 className="text-sm font-semibold text-text-main mb-4">
-              Support
-            </h3>
-            <ul className="space-y-2">
-              <li>
-                <Link
-                  href="/about"
-                  className="text-sm text-text-muted hover:text-accent-pink-500 transition-colors"
-                >
-                  About Us
-                </Link>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-sm text-text-muted hover:text-accent-pink-500 transition-colors"
-                >
-                  Help Center
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-sm text-text-muted hover:text-accent-pink-500 transition-colors"
-                >
-                  Privacy Policy
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-sm text-text-muted hover:text-accent-pink-500 transition-colors"
-                >
-                  Terms of Service
-                </a>
-              </li>
-            </ul>
-          </div>
-
           {/* Contact */}
           <div>
             <h3 className="text-sm font-semibold text-text-main mb-4">
@@ -120,11 +80,11 @@ export function Footer() {
             <ul className="space-y-3">
               <li className="flex items-start gap-2 text-sm text-text-muted">
                 <Mail className="w-4 h-4 mt-0.5 text-accent-pink-500 flex-shrink-0" />
-                <span>info@mwpl.com</span>
+                <span>walleevents@gmail.com</span>
               </li>
               <li className="flex items-start gap-2 text-sm text-text-muted">
                 <Phone className="w-4 h-4 mt-0.5 text-accent-pink-500 flex-shrink-0" />
-                <span>+91 98765 43210</span>
+                <span>+91 91370 55633</span>
               </li>
               <li className="flex items-start gap-2 text-sm text-text-muted">
                 <MapPin className="w-4 h-4 mt-0.5 text-accent-pink-500 flex-shrink-0" />
@@ -138,8 +98,7 @@ export function Footer() {
         <div className="mt-8 pt-8 border-t border-border-subtle">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <p className="text-sm text-text-subtle text-center sm:text-left">
-              © {currentYear} Mumbai Wholesale Premier League. All rights
-              reserved.
+              © {currentYear} Walle Arena. All rights reserved.
             </p>
             <div className="flex items-center gap-4">
               <a

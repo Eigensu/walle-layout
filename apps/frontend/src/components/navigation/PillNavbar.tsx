@@ -148,7 +148,7 @@ const PillNavbar: React.FC<PillNavbarProps> = ({
     <>
       <nav className={`fixed top-0 left-0 right-0 z-50 ${className}`}>
         {/* Desktop Navigation */}
-        <div className="hidden md:flex bg-bg-elevated rounded-full shadow-md border border-border-subtle p-1.5 items-center justify-between gap-1 transition-all duration-300">
+        <div className="hidden md:flex bg-bg-elevated shadow-md border-b border-border-subtle p-1.5 items-center justify-between gap-1 transition-all duration-300">
           {/* Left side: Logo and Nav Items */}
           <div className="flex items-center gap-1">
             {/* Logo */}
@@ -172,11 +172,11 @@ const PillNavbar: React.FC<PillNavbarProps> = ({
                   key={item.id}
                   onClick={() => handleNavigation(item.href)}
                   className={`
-                    flex items-center justify-center space-x-1.5 rounded-full font-medium whitespace-nowrap px-6 py-2.5
+                    flex items-center justify-center space-x-1.5 rounded-full font-medium whitespace-nowrap px-6 py-2.5 border
                     ${
                       isActive
-                        ? "bg-gradient-brand text-text-main shadow-pink-soft"
-                        : "text-text-muted hover:text-text-main hover:bg-bg-card-soft"
+                        ? "bg-gradient-brand text-text-main border-accent-pink-soft"
+                        : "text-text-muted hover:text-text-main hover:bg-bg-card-soft border-transparent"
                     }
                     outline-none focus:outline-none focus-visible:outline-none focus:ring-0 active:bg-transparent
                   `}
@@ -274,7 +274,7 @@ const PillNavbar: React.FC<PillNavbarProps> = ({
           </div>
         </div>
         {/* Mobile Navigation Header */}
-        <div className="md:hidden bg-bg-elevated rounded-2xl shadow-md border border-border-subtle">
+        <div className="md:hidden bg-bg-elevated shadow-md border border-border-subtle">
           <div className="flex items-center justify-between p-3">
             {/* Logo */}
             <Link

@@ -112,7 +112,7 @@ export function ContestCard({
         return (
           <Link
             href={`/contests/${contest.id}`}
-            className="inline-flex justify-center items-center px-4 py-2 rounded-lg bg-gradient-button-primary text-white text-sm font-medium shadow-pink-soft hover:shadow-pink-strong transition-shadow"
+            className="inline-flex justify-center items-center px-4 py-2 rounded-lg bg-bg-elevated text-white text-sm font-medium shadow-pink-soft hover:shadow-pink-strong transition-shadow"
             onClick={(e) => e.stopPropagation()}
           >
             Join Contest
@@ -122,7 +122,7 @@ export function ContestCard({
       return (
         <Link
           href={`${ROUTES.LOGIN}?next=${encodeURIComponent(`/contests/${contest.id}/team`)}`}
-          className="inline-flex justify-center items-center px-4 py-2 rounded-lg bg-gradient-button-primary text-white text-sm font-medium shadow-pink-soft hover:shadow-pink-strong transition-shadow"
+          className="inline-flex justify-center items-center px-4 py-2 rounded-lg bg-bg-elevated text-white text-sm font-medium shadow-pink-soft hover:shadow-pink-strong transition-shadow"
           onClick={(e) => e.stopPropagation()}
         >
           Login to Join Contest

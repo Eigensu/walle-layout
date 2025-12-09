@@ -51,7 +51,7 @@ export default function ContestLeaderboardTabPage() {
   }, [contestId]);
 
   return (
-    <>
+    <div className="min-h-screen bg-bg-body">
       <div className="py-4 sm:py-6">
         {/* Loading */}
         {isLoading && <LeaderboardSkeleton />}
@@ -168,7 +168,7 @@ export default function ContestLeaderboardTabPage() {
                   {/* Current user pinned */}
                   {currentUserEntry && currentUserEntry.rank > 8 && (
                     <div className="bg-bg-card/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg">
-                      <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
+                      <h3 className="text-base sm:text-lg font-semibold text-text-main mb-3 sm:mb-4">
                         Your Team
                       </h3>
                       <LeaderboardCard entry={currentUserEntry} isCurrentUser />
@@ -181,9 +181,9 @@ export default function ContestLeaderboardTabPage() {
         )}
 
         {!isLoading && !error && leaderboard?.entries.length === 0 && (
-          <div className="bg-white rounded-2xl sm:rounded-3xl p-8 sm:p-12 text-center shadow-lg">
-            <Trophy className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mx-auto mb-3 sm:mb-4" />
-            <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
+          <div className="bg-bg-card/80 rounded-2xl sm:rounded-3xl p-8 sm:p-12 text-center shadow-lg">
+            <Trophy className="w-12 h-12 sm:w-16 sm:h-16 text-accent-pink mx-auto mb-3 sm:mb-4" />
+            <h3 className="text-lg sm:text-xl font-semibold text-text-main mb-2">
               No Rankings Yet
             </h3>
             <p className="text-sm sm:text-base text-text-muted">
@@ -198,6 +198,6 @@ export default function ContestLeaderboardTabPage() {
         teamId={selectedTeamId || ""}
         onClose={() => setTeamDialogOpen(false)}
       />
-    </>
+    </div>
   );
 }

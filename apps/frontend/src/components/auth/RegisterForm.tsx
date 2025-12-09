@@ -101,11 +101,11 @@ export function RegisterForm() {
               className="object-cover"
             />
           </div>
-          <h1 className="text-4xl font-extrabold bg-gradient-primary bg-clip-text text-transparent">
+          <h1 className="text-4xl font-extrabold text-accent-pink-soft">
             Wall-E Arena
           </h1>
         </div>
-        <p className="text-gray-600">Create your account</p>
+        <p className="text-text-muted">Create your account</p>
       </div>
 
       {/* Register Form */}
@@ -179,7 +179,7 @@ export function RegisterForm() {
           />
 
           {/* Password guidance */}
-          <p className="text-xs text-gray-500 pl-2 -mt-2">
+          <p className="text-xs text-text-muted pl-2 -mt-2">
             Password should be at least 8 characters including a number and an
             uppercase letter.
           </p>
@@ -215,11 +215,11 @@ export function RegisterForm() {
 
           {/* Login Link */}
           <div className="text-center pt-4">
-            <p className="text-gray-600">
+            <p className="text-text-muted">
               Already have an account?{" "}
               <Link
                 href="/auth/login"
-                className="text-primary-600 hover:text-primary-700 font-semibold transition-colors"
+                className="text-accent-pink-soft hover:text-accent-pink font-semibold transition-colors"
               >
                 Sign In
               </Link>
@@ -229,7 +229,7 @@ export function RegisterForm() {
       </div>
 
       {/* Footer Note */}
-      <p className="text-center text-xs text-gray-500 mt-4">
+      <p className="text-center text-xs text-text-muted mt-4">
         By continuing, you agree to our Terms of Service and Privacy Policy
       </p>
     </div>

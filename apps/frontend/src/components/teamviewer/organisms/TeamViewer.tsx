@@ -226,7 +226,7 @@ export function TeamViewer({
       ) : (
         <>
           {/* List View (existing) */}
-          <h4 className="text-sm font-semibold text-gray-700 mb-3">
+          <h4 className="text-sm font-semibold text-[#E6E6FA] mb-3">
             Squad ({teamPlayers.length} players)
           </h4>
 

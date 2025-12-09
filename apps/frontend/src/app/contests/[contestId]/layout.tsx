@@ -52,7 +52,7 @@ export default function ContestLayout({
   const isLeaderboardRoute = pathname?.endsWith(`/leaderboard`);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-primary-50 to-gray-50">
+    <div className="min-h-screen bg-bg-body">
       <PillNavbar
         activeId={
           pathname?.endsWith("/leaderboard") ? "leaderboard" : "contests"

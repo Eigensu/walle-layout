@@ -161,10 +161,10 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       {isLoading ? (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-primary-50 to-gray-50">
+        <div className="min-h-screen flex items-center justify-center bg-bg-body">
           <div className="text-center">
             <Spinner size="lg" />
-            <p className="mt-4 text-gray-600">Loading Wall-E Arena...</p>
+            <p className="mt-4 text-text-muted">Loading Wall-E Arena...</p>
           </div>
         </div>
       ) : (
@@ -289,10 +289,10 @@ export default function HomePage() {
           >
             <PageContainer>
               <div className="text-center mb-10 sm:mb-14">
-                <h2 className="text-4xl font-extrabold text-center bg-gradient-primary bg-clip-text text-transparent leading-tight pb-1 mb-8">
+                <h2 className="text-4xl font-extrabold text-center text-text-muted leading-tight pb-1 mb-8">
                   Why Choose Us?
                 </h2>
-                <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                <p className="text-lg text-text-muted max-w-2xl mx-auto">
                   Experience the most engaging cricket fantasy platform with
                   powerful features
                 </p>
